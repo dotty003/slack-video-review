@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Review | ReviewBot</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <span class="logo-icon">🎬</span>
+        <span class="logo-text">ReviewBot</span>
+      </div>
+      <div class="video-title" id="videoTitle">Loading...</div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+      <!-- Video Player Section -->
+      <div class="player-section">
+        <div class="video-container">
+          <video id="videoPlayer" controls>
+            <source src="" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+
+          <!-- Custom Controls -->
+          <div class="video-controls">
+            <button class="control-btn play-btn" id="playPauseBtn">
+              <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+                <rect x="6" y="4" width="4" height="16" />
+                <rect x="14" y="4" width="4" height="16" />
+              </svg>
+            </button>
+
+            <div class="timeline" id="timeline">
+              <div class="timeline-progress" id="timelineProgress"></div>
+              <div class="timeline-markers" id="timelineMarkers"></div>
+            </div>
+
+            <div class="time-display">
+              <span id="currentTime">0:00</span>
+              <span>/</span>
+              <span id="duration">0:00</span>
+            </div>
+
+            <div class="volume-control">
+              <button class="control-btn volume-btn" id="volumeBtn">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
+                </svg>
+              </button>
+              <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.1" value="1">
+            </div>
+
+            <button class="control-btn fullscreen-btn" id="fullscreenBtn">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Add Comment Prompt -->
+        <div class="add-comment-hint">
+          💡 Click on the timeline to add a comment at that timestamp
+        </div>
+      </div>
+
+      <!-- Comments Panel -->
+      <aside class="comments-panel">
+        <div class="comments-header">
+          <h2>Comments</h2>
+          <div class="comments-stats" id="commentsStats">
+            <span class="stat open">0 open</span>
+            <span class="stat resolved">0 resolved</span>
+          </div>
+        </div>
+
+        <div class="comments-list" id="commentsList">
+          <!-- Comments will be rendered here -->
+        </div>
+      </aside>
+    </main>
+
+    <!-- Add Comment Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal" id="addCommentModal">
+        <div class="modal-header">
+          <h3>Add Comment at <span id="modalTimestamp">0:00</span></h3>
+          <button class="modal-close" id="modalClose">&times;</button>
+        </div>
+        <div class="modal-body">
+          <input type="text" id="commenterName" placeholder="Your name" class="input">
+          <textarea id="commentText" placeholder="Enter your feedback..." class="textarea" rows="4"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="cancelComment">Cancel</button>
+          <button class="btn btn-primary" id="submitComment">Add Comment</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/player.js"></script>
+</body>
+
+</html>
