@@ -106,7 +106,7 @@
     }
 
     // Fetch video data and comments
-    async function loadVideoData() {
+    async function loadVideoData(isInitialLoad = true) {
         try {
             const response = await fetch(`/api/video/${videoId}`);
             if (!response.ok) {
@@ -121,7 +121,11 @@
                 // Extract filename from URL
                 const urlPath = videoData.video_url.split('/').pop().split('?')[0];
                 videoTitle.textContent = decodeURIComponent(urlPath) || `Video #${videoId}`;
-                videoPlayer.src = videoData.video_url;
+
+                // Only set video source on initial load to preserve playback position
+                if (isInitialLoad) {
+                    videoPlayer.src = videoData.video_url;
+                }
             } else {
                 videoTitle.textContent = `Video #${videoId}`;
             }
@@ -233,7 +237,7 @@
                         method: 'PATCH',
                     });
                     if (response.ok) {
-                        await loadVideoData();
+                        await loadVideoData(false);
                     }
                 } catch (err) {
                     console.error('Failed to update comment:', err);
@@ -345,9 +349,8 @@
 
             if (response.ok) {
                 closeModal();
-                await loadVideoData();
-                // Resume video
-                videoPlayer.play();
+                await loadVideoData(false);
+                // Video continues playing from current position
             }
         } catch (err) {
             console.error('Failed to add comment:', err);
