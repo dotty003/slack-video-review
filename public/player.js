@@ -1,5 +1,5 @@
 // Video Review Player
-// Frame.io-style video player with timeline comments
+// Premium Frame.io-style video player with timeline comments
 
 (function () {
     'use strict';
@@ -9,7 +9,12 @@
     const videoId = urlParams.get('video');
 
     if (!videoId) {
-        document.body.innerHTML = '<div class="loading">No video specified. Use ?video=ID in URL.</div>';
+        document.body.innerHTML = `
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        <span>No video specified. Use ?video=ID in URL.</span>
+      </div>
+    `;
         return;
     }
 
@@ -57,6 +62,49 @@
         return `${minutes}:${String(secs).padStart(2, '0')}`;
     }
 
+    // Format relative time (e.g., "2 hours ago")
+    function formatRelativeTime(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffSecs = Math.floor(diffMs / 1000);
+        const diffMins = Math.floor(diffSecs / 60);
+        const diffHours = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHours / 24);
+
+        if (diffSecs < 60) return 'Just now';
+        if (diffMins < 60) return `${diffMins}m ago`;
+        if (diffHours < 24) return `${diffHours}h ago`;
+        if (diffDays < 7) return `${diffDays}d ago`;
+        return date.toLocaleDateString();
+    }
+
+    // Get initials from name/ID
+    function getInitials(name) {
+        if (!name) return '?';
+        const parts = name.replace(/[<>@]/g, '').split(/[\s_-]+/);
+        if (parts.length >= 2) {
+            return (parts[0][0] + parts[1][0]).toUpperCase();
+        }
+        return name.slice(0, 2).toUpperCase();
+    }
+
+    // Generate consistent color from name
+    function getAvatarColor(name) {
+        const colors = [
+            'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+            'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+            'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)',
+            'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)',
+        ];
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        return colors[Math.abs(hash) % colors.length];
+    }
+
     // Fetch video data and comments
     async function loadVideoData() {
         try {
@@ -69,13 +117,13 @@
             comments = data.comments || [];
 
             // Update UI
-            videoTitle.textContent = videoData.video_url ?
-                decodeURIComponent(videoData.video_url.split('/').pop().split('?')[0]) :
-                `Video #${videoId}`;
-
-            // Set video source
             if (videoData.video_url) {
+                // Extract filename from URL
+                const urlPath = videoData.video_url.split('/').pop().split('?')[0];
+                videoTitle.textContent = decodeURIComponent(urlPath) || `Video #${videoId}`;
                 videoPlayer.src = videoData.video_url;
+            } else {
+                videoTitle.textContent = `Video #${videoId}`;
             }
 
             updateCommentsStats(data.status);
@@ -83,7 +131,12 @@
             renderMarkers();
         } catch (err) {
             console.error('Failed to load video:', err);
-            document.body.innerHTML = `<div class="loading">Error: ${err.message}</div>`;
+            document.body.innerHTML = `
+        <div class="loading">
+          <div style="font-size: 48px; margin-bottom: 16px;">😕</div>
+          <span>Error: ${err.message}</span>
+        </div>
+      `;
         }
     }
 
@@ -102,7 +155,7 @@
         <div class="empty-comments">
           <div class="empty-comments-icon">💬</div>
           <p>No comments yet</p>
-          <p>Click on the timeline to add feedback</p>
+          <p>Click on the timeline to add your feedback</p>
         </div>
       `;
             return;
@@ -111,22 +164,39 @@
         // Sort by timestamp
         const sorted = [...comments].sort((a, b) => a.timestamp_seconds - b.timestamp_seconds);
 
-        commentsList.innerHTML = sorted.map(comment => `
-      <div class="comment-card ${comment.resolved ? 'resolved' : ''}" data-timestamp="${comment.timestamp_seconds}" data-id="${comment.id}">
-        <div class="comment-header">
-          <span class="comment-timestamp">${formatTime(comment.timestamp_seconds)}</span>
-          <span class="comment-id">#${comment.id}</span>
+        commentsList.innerHTML = sorted.map(comment => {
+            const initials = getInitials(comment.user_id);
+            const avatarColor = getAvatarColor(comment.user_id);
+            const timeAgo = formatRelativeTime(comment.created_at);
+            const displayName = comment.user_id.replace(/[<>@]/g, '') || 'Reviewer';
+
+            return `
+        <div class="comment-card ${comment.resolved ? 'resolved' : ''}" 
+             data-timestamp="${comment.timestamp_seconds}" 
+             data-id="${comment.id}">
+          <div class="comment-header">
+            <span class="comment-timestamp">${formatTime(comment.timestamp_seconds)}</span>
+            <span class="comment-meta">
+              <span class="comment-id">#${comment.id}</span>
+            </span>
+          </div>
+          <div class="comment-author">
+            <div class="comment-avatar" style="background: ${avatarColor}">${initials}</div>
+            <div class="comment-author-info">
+              <span class="comment-author-name">${escapeHtml(displayName)}</span>
+              <span class="comment-time-ago">${timeAgo}</span>
+            </div>
+          </div>
+          <div class="comment-text">${escapeHtml(comment.comment_text)}</div>
+          <div class="comment-actions">
+            ${comment.resolved
+                    ? `<button class="comment-action-btn" data-action="unresolve">↩ Reopen</button>`
+                    : `<button class="comment-action-btn resolve" data-action="resolve">✓ Resolve</button>`
+                }
+          </div>
         </div>
-        <div class="comment-author">${comment.user_id}</div>
-        <div class="comment-text">${escapeHtml(comment.comment_text)}</div>
-        <div class="comment-actions">
-          ${comment.resolved
-                ? `<button class="comment-action-btn" data-action="unresolve">Reopen</button>`
-                : `<button class="comment-action-btn resolve" data-action="resolve">✓ Resolve</button>`
-            }
-        </div>
-      </div>
-    `).join('');
+      `;
+        }).join('');
 
         // Add click handlers
         commentsList.querySelectorAll('.comment-card').forEach(card => {
@@ -137,6 +207,12 @@
                 const timestamp = parseInt(card.dataset.timestamp, 10);
                 videoPlayer.currentTime = timestamp;
                 videoPlayer.play();
+
+                // Highlight the card briefly
+                card.style.boxShadow = '0 0 0 2px var(--accent)';
+                setTimeout(() => {
+                    card.style.boxShadow = '';
+                }, 1000);
             });
         });
 
@@ -148,16 +224,21 @@
                 const commentId = card.dataset.id;
                 const action = btn.dataset.action;
 
+                // Add loading state
+                btn.textContent = '...';
+                btn.disabled = true;
+
                 try {
                     const response = await fetch(`/api/comments/${commentId}/${action}`, {
                         method: 'PATCH',
                     });
                     if (response.ok) {
-                        // Reload to refresh state
                         await loadVideoData();
                     }
                 } catch (err) {
                     console.error('Failed to update comment:', err);
+                    btn.textContent = action === 'resolve' ? '✓ Resolve' : '↩ Reopen';
+                    btn.disabled = false;
                 }
             });
         });
@@ -169,11 +250,12 @@
 
         timelineMarkers.innerHTML = comments.map(comment => {
             const position = (comment.timestamp_seconds / duration) * 100;
+            const preview = comment.comment_text.substring(0, 40) + (comment.comment_text.length > 40 ? '...' : '');
             return `
         <div class="timeline-marker ${comment.resolved ? 'resolved' : ''}" 
              style="left: ${position}%"
              data-timestamp="${comment.timestamp_seconds}"
-             title="${formatTime(comment.timestamp_seconds)}: ${escapeHtml(comment.comment_text.substring(0, 50))}...">
+             title="${formatTime(comment.timestamp_seconds)}: ${escapeHtml(preview)}">
         </div>
       `;
         }).join('');
@@ -212,17 +294,23 @@
         const percentage = clickX / rect.width;
         const timestamp = Math.floor(percentage * videoPlayer.duration);
 
-        // Open add comment modal
+        // Pause video and open modal
+        videoPlayer.pause();
         pendingTimestamp = timestamp;
         modalTimestamp.textContent = formatTime(timestamp);
         modalOverlay.classList.add('active');
-        commentText.focus();
+
+        // Focus on name or text input
+        if (!commenterName.value) {
+            commenterName.focus();
+        } else {
+            commentText.focus();
+        }
     }
 
     // Close modal
     function closeModal() {
         modalOverlay.classList.remove('active');
-        commenterName.value = '';
         commentText.value = '';
     }
 
@@ -233,8 +321,16 @@
 
         if (!text) {
             commentText.focus();
+            commentText.style.borderColor = 'var(--warning)';
+            setTimeout(() => {
+                commentText.style.borderColor = '';
+            }, 2000);
             return;
         }
+
+        // Add loading state
+        submitComment.textContent = 'Adding...';
+        submitComment.disabled = true;
 
         try {
             const response = await fetch(`/api/video/${videoId}/comments`, {
@@ -250,13 +346,21 @@
             if (response.ok) {
                 closeModal();
                 await loadVideoData();
+                // Resume video
+                videoPlayer.play();
             }
         } catch (err) {
             console.error('Failed to add comment:', err);
+        } finally {
+            submitComment.textContent = 'Add Comment';
+            submitComment.disabled = false;
         }
     }
 
+    // ================================================
     // Event Listeners
+    // ================================================
+
     videoPlayer.addEventListener('timeupdate', updateProgress);
     videoPlayer.addEventListener('loadedmetadata', () => {
         durationEl.textContent = formatTime(videoPlayer.duration);
@@ -291,19 +395,34 @@
     // Volume control
     volumeSlider.addEventListener('input', (e) => {
         videoPlayer.volume = e.target.value;
+        updateVolumeIcon();
     });
 
     volumeBtn.addEventListener('click', () => {
         videoPlayer.muted = !videoPlayer.muted;
         volumeSlider.value = videoPlayer.muted ? 0 : videoPlayer.volume;
+        updateVolumeIcon();
     });
+
+    function updateVolumeIcon() {
+        const volumeOn = volumeBtn.querySelector('.volume-on');
+        const volumeOff = volumeBtn.querySelector('.volume-off');
+        if (videoPlayer.muted || videoPlayer.volume === 0) {
+            volumeOn.style.display = 'none';
+            volumeOff.style.display = 'block';
+        } else {
+            volumeOn.style.display = 'block';
+            volumeOff.style.display = 'none';
+        }
+    }
 
     // Fullscreen
     fullscreenBtn.addEventListener('click', () => {
+        const container = document.querySelector('.video-container');
         if (document.fullscreenElement) {
             document.exitFullscreen();
         } else {
-            document.querySelector('.video-container').requestFullscreen();
+            container.requestFullscreen();
         }
     });
 
@@ -316,7 +435,13 @@
         }
     });
 
-    // Close modal on escape
+    // Close modal on escape or click outside
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+            closeModal();
+        }
+    });
+
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
             closeModal();
@@ -327,26 +452,41 @@
         }
     });
 
-    // Keyboard shortcuts
+    // Keyboard shortcuts (when not in modal)
     document.addEventListener('keydown', (e) => {
-        // Space to play/pause (if not in modal)
-        if (e.code === 'Space' && !modalOverlay.classList.contains('active')) {
-            e.preventDefault();
-            if (videoPlayer.paused) {
-                videoPlayer.play();
-            } else {
-                videoPlayer.pause();
-            }
-        }
-        // Arrow keys to seek
-        if (e.code === 'ArrowLeft' && !modalOverlay.classList.contains('active')) {
-            videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 5);
-        }
-        if (e.code === 'ArrowRight' && !modalOverlay.classList.contains('active')) {
-            videoPlayer.currentTime = Math.min(videoPlayer.duration, videoPlayer.currentTime + 5);
+        if (modalOverlay.classList.contains('active')) return;
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        switch (e.code) {
+            case 'Space':
+                e.preventDefault();
+                if (videoPlayer.paused) {
+                    videoPlayer.play();
+                } else {
+                    videoPlayer.pause();
+                }
+                break;
+            case 'ArrowLeft':
+                e.preventDefault();
+                videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 5);
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                videoPlayer.currentTime = Math.min(videoPlayer.duration, videoPlayer.currentTime + 5);
+                break;
+            case 'KeyF':
+                e.preventDefault();
+                fullscreenBtn.click();
+                break;
+            case 'KeyM':
+                e.preventDefault();
+                volumeBtn.click();
+                break;
         }
     });
 
+    // ================================================
     // Initialize
+    // ================================================
     loadVideoData();
 })();
