@@ -148,9 +148,10 @@ function createApiRouter(slackClient) {
             }
 
             // Add comment to database
+            // Use userName as userId for web comments so it displays correctly
             const comment = commentsService.addComment({
                 videoId,
-                userId: userId || 'web-user',
+                userId: userId || userName || 'web-user',
                 timestampSeconds: parseInt(timestampSeconds, 10),
                 commentText,
             });
