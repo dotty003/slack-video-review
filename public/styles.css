@@ -308,8 +308,30 @@ body::before {
   transform: scale(1.2);
 }
 
-.fullscreen-btn {
+/* Comment button */
+.comment-btn {
+  color: var(--accent);
+  border-color: rgba(139, 92, 246, 0.3);
+  background: rgba(139, 92, 246, 0.1);
   margin-left: auto;
+  width: auto;
+  padding: 0 16px;
+  gap: 8px;
+}
+
+.comment-btn:hover {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.comment-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.fullscreen-btn {
+  margin-left: 10px;
 }
 
 /* ================================================

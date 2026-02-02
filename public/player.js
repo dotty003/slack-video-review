@@ -42,6 +42,7 @@
     const pauseIcon = playPauseBtn.querySelector('.pause-icon');
     const volumeBtn = document.getElementById('volumeBtn');
     const volumeSlider = document.getElementById('volumeSlider');
+    const addCommentBtn = document.getElementById('addCommentBtn');
     const fullscreenBtn = document.getElementById('fullscreenBtn');
 
     // State
@@ -291,15 +292,21 @@
         currentTimeEl.textContent = formatTime(videoPlayer.currentTime);
     }
 
-    // Timeline click handler
+    // Timeline click handler - Only seeks now
     function handleTimelineClick(e) {
         const rect = timeline.getBoundingClientRect();
         const clickX = e.clientX - rect.left;
         const percentage = clickX / rect.width;
         const timestamp = Math.floor(percentage * videoPlayer.duration);
 
+        videoPlayer.currentTime = timestamp;
+    }
+
+    // Handle "Leave Comment" button click
+    function handleAddCommentClick() {
         // Pause video and open modal
         videoPlayer.pause();
+        const timestamp = Math.floor(videoPlayer.currentTime);
         pendingTimestamp = timestamp;
         modalTimestamp.textContent = formatTime(timestamp);
         modalOverlay.classList.add('active');
@@ -371,6 +378,7 @@
     });
 
     timeline.addEventListener('click', handleTimelineClick);
+    addCommentBtn.addEventListener('click', handleAddCommentClick);
     modalClose.addEventListener('click', closeModal);
     cancelComment.addEventListener('click', closeModal);
     submitComment.addEventListener('click', handleSubmitComment);
