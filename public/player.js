@@ -109,7 +109,8 @@
     // Fetch video data and comments
     async function loadVideoData(isInitialLoad = true) {
         try {
-            const response = await fetch(`/api/video/${videoId}`);
+            // Add cache buster to prevent caching of old data
+            const response = await fetch(`/api/video/${videoId}?_t=${Date.now()}`);
             if (!response.ok) {
                 throw new Error('Video not found');
             }
