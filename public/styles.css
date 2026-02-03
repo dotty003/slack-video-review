@@ -1,6 +1,9 @@
 /* ================================================
-   ReviewBot Video Player - Premium Design
+   ReviewBot Video Player - WONDR Media Branding
    ================================================ */
+
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap');
 
 /* Reset & Base */
 * {
@@ -10,59 +13,68 @@
 }
 
 :root {
-  /* Premium color palette */
-  --bg-gradient-start: #0a0a0f;
-  --bg-gradient-mid: #12121a;
-  --bg-gradient-end: #1a1a2e;
-  --surface-primary: rgba(255, 255, 255, 0.03);
-  --surface-secondary: rgba(255, 255, 255, 0.05);
-  --surface-elevated: rgba(255, 255, 255, 0.08);
-  --surface-hover: rgba(255, 255, 255, 0.12);
+  /* WONDR Brand Colors */
+  --primary: #E8C0E4;
+  --accent: #FF5BA3;
+  --accent-hover: #ff7ab6;
+  --accent-glow: rgba(255, 91, 163, 0.35);
+  --accent-gradient: linear-gradient(135deg, #FF5BA3 0%, #E8C0E4 100%);
 
-  /* Glass effect */
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  /* Light Theme Backgrounds */
+  --bg-main: #F9F9F9;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #FFFFFF;
+
+  /* Surfaces with subtle pink tint */
+  --surface-primary: rgba(232, 192, 228, 0.08);
+  --surface-secondary: rgba(232, 192, 228, 0.12);
+  --surface-elevated: rgba(232, 192, 228, 0.18);
+  --surface-hover: rgba(255, 91, 163, 0.12);
+
+  /* Glass effect - light mode */
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(232, 192, 228, 0.4);
+  --glass-shadow: 0 8px 32px rgba(232, 192, 228, 0.25);
 
   /* Text colors */
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --text-muted: rgba(255, 255, 255, 0.4);
-
-  /* Accent colors */
-  --accent: #8b5cf6;
-  --accent-glow: rgba(139, 92, 246, 0.4);
-  --accent-hover: #a78bfa;
-  --accent-gradient: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  --text-primary: #1a1a2e;
+  --text-secondary: #4a4a5a;
+  --text-muted: #8a8a9a;
+  --text-accent: #FF5BA3;
 
   /* Status colors */
   --success: #10b981;
-  --success-glow: rgba(16, 185, 129, 0.3);
+  --success-glow: rgba(16, 185, 129, 0.25);
   --warning: #f59e0b;
-  --warning-glow: rgba(245, 158, 11, 0.3);
+  --warning-glow: rgba(245, 158, 11, 0.25);
 
   /* Borders */
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-default: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(232, 192, 228, 0.3);
+  --border-default: rgba(232, 192, 228, 0.5);
 
   /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 40px rgba(139, 92, 246, 0.15);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 40px rgba(255, 91, 163, 0.15);
+
+  /* WONDR Spacing */
+  --radius-sm: 8px;
+  --radius-md: 15px;
+  --radius-lg: 20px;
+  --radius-pill: 115px;
 }
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 50%, var(--bg-gradient-end) 100%);
-  background-attachment: fixed;
+  background: var(--bg-main);
   color: var(--text-primary);
   min-height: 100vh;
   overflow: hidden;
   line-height: 1.5;
 }
 
-/* Subtle animated background */
+/* Subtle animated background with pink accents */
 body::before {
   content: '';
   position: fixed;
@@ -71,10 +83,21 @@ body::before {
   right: 0;
   bottom: 0;
   background:
-    radial-gradient(ellipse at 20% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 80%, rgba(99, 102, 241, 0.06) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 20%, rgba(232, 192, 228, 0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(255, 91, 163, 0.15) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
+}
+
+/* Headings use Poppins */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
 }
 
 /* App Layout */
@@ -98,24 +121,32 @@ body::before {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
 }
 
 .logo {
   display: flex;
   align-items: center;
   gap: 10px;
+  font-family: 'Poppins', sans-serif;
   font-weight: 700;
   font-size: 18px;
   letter-spacing: -0.02em;
 }
 
+.logo-image {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+
 .logo-icon {
   font-size: 28px;
-  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.5));
+  filter: drop-shadow(0 0 8px rgba(255, 91, 163, 0.5));
 }
 
 .logo-text {
-  background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -185,8 +216,8 @@ body::before {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #000;
-  border-radius: 16px;
+  background: #1a1a2e;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-lg), var(--shadow-glow);
   border: 1px solid var(--border-subtle);
@@ -214,7 +245,7 @@ body::before {
   align-items: center;
   gap: 16px;
   padding: 16px 20px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.7) 100%);
+  background: linear-gradient(to top, rgba(26, 26, 46, 0.95) 0%, rgba(26, 26, 46, 0.85) 100%);
   backdrop-filter: blur(10px);
 }
 
@@ -224,16 +255,16 @@ body::before {
   justify-content: center;
   width: 44px;
   height: 44px;
-  background: var(--surface-elevated);
-  border: 1px solid var(--border-default);
-  border-radius: 12px;
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md);
+  color: #ffffff;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .control-btn:hover {
-  background: var(--surface-hover);
+  background: rgba(255, 91, 163, 0.25);
   border-color: var(--accent);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -282,7 +313,7 @@ body::before {
   height: 4px;
   -webkit-appearance: none;
   appearance: none;
-  background: var(--surface-elevated);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 2px;
   cursor: pointer;
   transition: all 0.2s;
@@ -310,19 +341,20 @@ body::before {
 
 /* Comment button */
 .comment-btn {
-  color: var(--accent);
-  border-color: rgba(139, 92, 246, 0.3);
-  background: rgba(139, 92, 246, 0.1);
+  color: #ffffff;
+  border-color: rgba(255, 91, 163, 0.5);
+  background: rgba(255, 91, 163, 0.2);
   margin-left: auto;
   width: auto;
   padding: 0 16px;
   gap: 8px;
+  border-radius: var(--radius-pill);
 }
 
 .comment-btn:hover {
   background: var(--accent);
   color: white;
-  box-shadow: 0 0 15px var(--accent-glow);
+  box-shadow: 0 0 20px var(--accent-glow);
 }
 
 .comment-btn svg {
@@ -340,7 +372,7 @@ body::before {
 .timeline {
   flex: 1;
   height: 6px;
-  background: var(--surface-elevated);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 3px;
   cursor: pointer;
   position: relative;
@@ -422,7 +454,7 @@ body::before {
 /* Time display */
 .time-display {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.7);
   font-variant-numeric: tabular-nums;
   min-width: 100px;
   text-align: right;
@@ -464,12 +496,14 @@ body::before {
 }
 
 .comments-header h2 {
+  font-family: 'Poppins', sans-serif;
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 12px;
   display: flex;
   align-items: center;
   gap: 8px;
+  color: var(--text-primary);
 }
 
 .comments-header h2::before {
@@ -529,15 +563,16 @@ body::before {
    Comment Card
    ================================================ */
 .comment-card {
-  background: var(--surface-secondary);
+  background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: 16px;
   margin-bottom: 12px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
 .comment-card::before {
@@ -552,10 +587,10 @@ body::before {
 }
 
 .comment-card:hover {
-  background: var(--surface-hover);
-  border-color: var(--border-default);
+  background: var(--bg-surface);
+  border-color: var(--accent);
   transform: translateX(4px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-md), 0 0 0 1px var(--accent);
 }
 
 .comment-card.resolved {
@@ -582,14 +617,14 @@ body::before {
   font-size: 13px;
   color: var(--accent);
   padding: 4px 10px;
-  background: rgba(139, 92, 246, 0.15);
+  background: rgba(255, 91, 163, 0.12);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .comment-timestamp:hover {
-  background: rgba(139, 92, 246, 0.25);
+  background: rgba(255, 91, 163, 0.22);
 }
 
 .comment-meta {
@@ -659,7 +694,7 @@ body::before {
 .comment-action-btn {
   font-size: 12px;
   padding: 6px 14px;
-  border-radius: 6px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--border-default);
   cursor: pointer;
   background: var(--surface-secondary);
@@ -675,7 +710,7 @@ body::before {
 }
 
 .comment-action-btn.resolve {
-  background: rgba(16, 185, 129, 0.15);
+  background: rgba(16, 185, 129, 0.12);
   border-color: rgba(16, 185, 129, 0.3);
   color: var(--success);
 }
@@ -717,7 +752,7 @@ body::before {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(8px);
   display: none;
   align-items: center;
@@ -730,8 +765,8 @@ body::before {
 }
 
 .modal {
-  background: var(--bg-gradient-mid);
-  border-radius: 20px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
   width: 100%;
   max-width: 500px;
   border: 1px solid var(--border-default);
@@ -760,11 +795,13 @@ body::before {
 }
 
 .modal-header h3 {
+  font-family: 'Poppins', sans-serif;
   font-size: 18px;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 10px;
+  color: var(--text-primary);
 }
 
 .modal-header h3::before {
@@ -773,7 +810,7 @@ body::before {
 
 #modalTimestamp {
   color: var(--accent);
-  background: rgba(139, 92, 246, 0.15);
+  background: rgba(255, 91, 163, 0.12);
   padding: 2px 8px;
   border-radius: 4px;
 }
@@ -806,24 +843,14 @@ body::before {
 .textarea {
   width: 100%;
   padding: 14px 16px;
-  background: var(--surface-secondary);
+  background: var(--bg-main);
   border: 1px solid var(--border-default);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   color: var(--text-primary);
   font-family: inherit;
   font-size: 14px;
   margin-bottom: 16px;
   transition: all 0.2s;
-  color: #ffffff !important;
-  /* Force white text */
-}
-
-/* Fix browser autofill background/color */
-.input:-webkit-autofill,
-.textarea:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 30px #2a2a35 inset !important;
-  -webkit-text-fill-color: white !important;
-  caret-color: white !important;
 }
 
 .input::placeholder,
@@ -857,7 +884,7 @@ body::before {
    ================================================ */
 .btn {
   padding: 12px 24px;
-  border-radius: 10px;
+  border-radius: var(--radius-pill);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -866,12 +893,13 @@ body::before {
 }
 
 .btn-primary {
-  background: var(--accent-gradient);
+  background: var(--accent);
   color: white;
   box-shadow: 0 4px 15px var(--accent-glow);
 }
 
 .btn-primary:hover {
+  background: var(--accent-hover);
   transform: translateY(-2px);
   box-shadow: 0 6px 25px var(--accent-glow);
 }
@@ -884,7 +912,7 @@ body::before {
 
 .btn-secondary:hover {
   background: var(--surface-hover);
-  border-color: var(--border-default);
+  border-color: var(--accent);
 }
 
 /* ================================================
@@ -899,12 +927,12 @@ body::before {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--surface-elevated);
+  background: var(--primary);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--surface-hover);
+  background: var(--accent);
 }
 
 /* ================================================
@@ -918,12 +946,13 @@ body::before {
   height: 100vh;
   color: var(--text-muted);
   gap: 16px;
+  background: var(--bg-main);
 }
 
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid var(--surface-elevated);
+  border: 3px solid var(--primary);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 1s linear infinite;
