@@ -136,7 +136,7 @@ function createApiRouter(slackClient) {
     router.post('/video/:id/comments', async (req, res) => {
         try {
             const videoId = parseInt(req.params.id, 10);
-            const { userId, userName, timestampSeconds, commentText } = req.body;
+            const { userId, userName, timestampSeconds, commentText, attachmentUrl } = req.body;
 
             if (!commentText || timestampSeconds === undefined) {
                 return res.status(400).json({ error: 'Missing required fields' });
@@ -147,13 +147,14 @@ function createApiRouter(slackClient) {
                 return res.status(404).json({ error: 'Video not found' });
             }
 
-            // Add comment to database
+            // Add comment to database with optional attachment
             // Use userName as userId for web comments so it displays correctly
             const comment = await commentsService.addComment({
                 videoId,
                 userId: userId || userName || 'web-user',
                 timestampSeconds: parseInt(timestampSeconds, 10),
                 commentText,
+                attachmentUrl: attachmentUrl || null,
             });
 
             // Post to Slack thread
@@ -163,11 +164,20 @@ function createApiRouter(slackClient) {
                     const seconds = timestampSeconds % 60;
                     const timeStr = `${minutes}:${String(seconds).padStart(2, '0')}`;
 
-                    await slackClient.chat.postMessage({
+                    const messagePayload = {
                         channel: video.channel_id,
                         thread_ts: video.message_ts,
                         text: `📝 *[${timeStr}]* ${userName || 'Reviewer'}: "${commentText}"`,
-                    });
+                    };
+
+                    // If there's an attachment (annotation screenshot), post it as an image block
+                    if (attachmentUrl && attachmentUrl.startsWith('data:image')) {
+                        // For base64 images, we note that there's an annotation
+                        // Slack doesn't accept base64 directly; we'd need file upload for production
+                        messagePayload.text += '\n📎 _[Annotation attached - view in web player]_';
+                    }
+
+                    await slackClient.chat.postMessage(messagePayload);
                 } catch (slackErr) {
                     console.error('Failed to post to Slack:', slackErr.message);
                 }
@@ -202,6 +212,23 @@ function createApiRouter(slackClient) {
         try {
             const commentId = parseInt(req.params.id, 10);
             const success = await commentsService.unresolveComment(commentId);
+
+            if (success) {
+                res.json({ success: true });
+            } else {
+                res.status(404).json({ error: 'Comment not found' });
+            }
+        } catch (err) {
+            console.error('API error:', err);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    });
+
+    // Delete comment
+    router.delete('/comments/:id', async (req, res) => {
+        try {
+            const commentId = parseInt(req.params.id, 10);
+            const success = await commentsService.deleteComment(commentId);
 
             if (success) {
                 res.json({ success: true });

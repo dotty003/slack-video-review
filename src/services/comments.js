@@ -5,13 +5,13 @@ const { prepare } = require('../database/db');
  * @param {object} params - Comment parameters
  * @returns {object} - Created comment record
  */
-async function addComment({ videoId, userId, timestampSeconds, commentText }) {
+async function addComment({ videoId, userId, timestampSeconds, commentText, attachmentUrl = null }) {
   const stmt = prepare(`
-    INSERT INTO comments (video_id, user_id, timestamp_seconds, comment_text)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO comments (video_id, user_id, timestamp_seconds, comment_text, attachment_url)
+    VALUES (?, ?, ?, ?, ?)
   `);
 
-  const result = await stmt.run(videoId, userId, timestampSeconds, commentText);
+  const result = await stmt.run(videoId, userId, timestampSeconds, commentText, attachmentUrl);
 
   // Return a constructed comment object
   return {
@@ -20,6 +20,7 @@ async function addComment({ videoId, userId, timestampSeconds, commentText }) {
     user_id: userId,
     timestamp_seconds: timestampSeconds,
     comment_text: commentText,
+    attachment_url: attachmentUrl,
     resolved: 0,
     created_at: new Date().toISOString(),
   };
@@ -117,6 +118,21 @@ async function commentBelongsToVideo(commentId, videoId) {
   return comment && comment.video_id === videoId;
 }
 
+/**
+ * Delete a comment
+ * @param {number} commentId - Comment ID
+ * @returns {boolean} - Success
+ */
+async function deleteComment(commentId) {
+  const stmt = prepare(`
+    DELETE FROM comments 
+    WHERE id = ?
+  `);
+
+  const result = await stmt.run(commentId);
+  return result.changes > 0;
+}
+
 module.exports = {
   addComment,
   getCommentById,
@@ -125,4 +141,5 @@ module.exports = {
   unresolveComment,
   getStatus,
   commentBelongsToVideo,
+  deleteComment,
 };

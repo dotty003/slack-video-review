@@ -49,9 +49,18 @@ async function initPostgres() {
                 user_id TEXT NOT NULL,
                 timestamp_seconds INTEGER NOT NULL,
                 comment_text TEXT NOT NULL,
+                attachment_url TEXT,
                 resolved INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
+        `);
+        
+        // Add attachment_url column if it doesn't exist (for existing databases)
+        await client.query(`
+            DO $$ BEGIN
+                ALTER TABLE comments ADD COLUMN IF NOT EXISTS attachment_url TEXT;
+            EXCEPTION WHEN duplicate_column THEN NULL;
+            END $$;
         `);
 
         // Create indexes

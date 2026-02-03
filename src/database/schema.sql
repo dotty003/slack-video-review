@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS comments (
     user_id TEXT NOT NULL,
     timestamp_seconds INTEGER NOT NULL,
     comment_text TEXT NOT NULL,
+    attachment_url TEXT,
     resolved INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (video_id) REFERENCES videos(id) ON DELETE CASCADE
