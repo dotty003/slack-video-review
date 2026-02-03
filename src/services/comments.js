@@ -5,18 +5,17 @@ const { prepare } = require('../database/db');
  * @param {object} params - Comment parameters
  * @returns {object} - Created comment record
  */
-function addComment({ videoId, userId, timestampSeconds, commentText }) {
+async function addComment({ videoId, userId, timestampSeconds, commentText }) {
   const stmt = prepare(`
     INSERT INTO comments (video_id, user_id, timestamp_seconds, comment_text)
     VALUES (?, ?, ?, ?)
   `);
 
-  const result = stmt.run(videoId, userId, timestampSeconds, commentText);
+  const result = await stmt.run(videoId, userId, timestampSeconds, commentText);
 
-  // Return a constructed comment object instead of refetching
-  // This avoids issues with sql.js lastInsertRowid
+  // Return a constructed comment object
   return {
-    id: result.lastInsertRowid || Date.now(), // Fallback ID
+    id: result.lastInsertRowid || Date.now(),
     video_id: videoId,
     user_id: userId,
     timestamp_seconds: timestampSeconds,
@@ -31,9 +30,9 @@ function addComment({ videoId, userId, timestampSeconds, commentText }) {
  * @param {number} commentId - Comment ID
  * @returns {object|null} - Comment record or null
  */
-function getCommentById(commentId) {
+async function getCommentById(commentId) {
   const stmt = prepare('SELECT * FROM comments WHERE id = ?');
-  return stmt.get(commentId);
+  return await stmt.get(commentId);
 }
 
 /**
@@ -41,14 +40,14 @@ function getCommentById(commentId) {
  * @param {number} videoId - Video ID
  * @returns {object[]} - Array of comment records
  */
-function getComments(videoId) {
+async function getComments(videoId) {
   const stmt = prepare(`
     SELECT * FROM comments 
     WHERE video_id = ?
     ORDER BY timestamp_seconds ASC
   `);
 
-  return stmt.all(videoId);
+  return await stmt.all(videoId);
 }
 
 /**
@@ -56,14 +55,14 @@ function getComments(videoId) {
  * @param {number} commentId - Comment ID
  * @returns {boolean} - Success
  */
-function resolveComment(commentId) {
+async function resolveComment(commentId) {
   const stmt = prepare(`
     UPDATE comments 
     SET resolved = 1 
     WHERE id = ?
   `);
 
-  const result = stmt.run(commentId);
+  const result = await stmt.run(commentId);
   return result.changes > 0;
 }
 
@@ -72,14 +71,14 @@ function resolveComment(commentId) {
  * @param {number} commentId - Comment ID
  * @returns {boolean} - Success
  */
-function unresolveComment(commentId) {
+async function unresolveComment(commentId) {
   const stmt = prepare(`
     UPDATE comments 
     SET resolved = 0 
     WHERE id = ?
   `);
 
-  const result = stmt.run(commentId);
+  const result = await stmt.run(commentId);
   return result.changes > 0;
 }
 
@@ -88,7 +87,7 @@ function unresolveComment(commentId) {
  * @param {number} videoId - Video ID
  * @returns {object} - { open, resolved, total }
  */
-function getStatus(videoId) {
+async function getStatus(videoId) {
   const stmt = prepare(`
     SELECT 
       COUNT(*) as total,
@@ -98,12 +97,12 @@ function getStatus(videoId) {
     WHERE video_id = ?
   `);
 
-  const result = stmt.get(videoId);
+  const result = await stmt.get(videoId);
 
   return {
-    open: result?.open || 0,
-    resolved: result?.resolved || 0,
-    total: result?.total || 0,
+    open: parseInt(result?.open) || 0,
+    resolved: parseInt(result?.resolved) || 0,
+    total: parseInt(result?.total) || 0,
   };
 }
 
@@ -113,8 +112,8 @@ function getStatus(videoId) {
  * @param {number} videoId - Video ID
  * @returns {boolean}
  */
-function commentBelongsToVideo(commentId, videoId) {
-  const comment = getCommentById(commentId);
+async function commentBelongsToVideo(commentId, videoId) {
+  const comment = await getCommentById(commentId);
   return comment && comment.video_id === videoId;
 }
 

@@ -7,6 +7,9 @@ module.exports = {
     appToken: process.env.SLACK_APP_TOKEN,
   },
   database: {
+    // PostgreSQL connection string (used in production)
+    url: process.env.DATABASE_URL,
+    // SQLite path (used for local development)
     path: process.env.DATABASE_PATH || './data/reviews.db',
   },
 };

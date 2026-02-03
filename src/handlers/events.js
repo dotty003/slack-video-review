@@ -26,7 +26,7 @@ async function handleFileShared({ client, event, baseUrl }) {
         }
 
         // Register the video
-        const video = registerVideo({
+        const video = await registerVideo({
             channelId: channel_id,
             messageTs: messageTs,
             threadTs: messageTs,
@@ -119,7 +119,7 @@ async function handleMessage({ client, event }) {
     }
 
     // Register the video
-    registerVideo({
+    await registerVideo({
         channelId: channel,
         messageTs: ts,
         threadTs: ts,

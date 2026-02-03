@@ -37,23 +37,36 @@ git push -u origin main
 
 ---
 
-## Step 2: Create Render Account & Service
+## Step 2: Create Render PostgreSQL Database
+
+> ⚠️ **Important:** This step ensures your video data persists across deploys.
 
 1. Go to [render.com](https://render.com) and sign up/login
-2. Click **"New +"** → **"Web Service"**
-3. Connect your GitHub account
-4. Select your `slack-video-review` repository
+2. Click **"New +"** → **"PostgreSQL"**
+3. Configure the database:
+   | Setting | Value |
+   |---------|-------|
+   | **Name** | `reviewbot-db` |
+   | **Region** | Same as your web service |
+   | **Instance Type** | Free |
+
+4. Click **"Create Database"**
+5. Wait for creation, then copy the **Internal Database URL** (starts with `postgres://`)
 
 ---
 
-## Step 3: Configure Render Settings
+## Step 3: Create Render Web Service
+
+1. Click **"New +"** → **"Web Service"**
+2. Connect your GitHub account
+3. Select your `slack-video-review` repository
 
 Use these settings:
 
 | Setting | Value |
 |---------|-------|
 | **Name** | `reviewbot` (or any name you like) |
-| **Region** | Choose closest to your team |
+| **Region** | Same as your database |
 | **Branch** | `main` |
 | **Runtime** | Node |
 | **Build Command** | `npm install` |
@@ -71,10 +84,11 @@ In the Render dashboard, go to **Environment** and add these variables:
 | `SLACK_BOT_TOKEN` | Your Bot Token (starts with `xoxb-`) |
 | `SLACK_SIGNING_SECRET` | Your Signing Secret (from App Credentials) |
 | `SLACK_APP_TOKEN` | Your App Token (starts with `xapp-`) |
+| `DATABASE_URL` | Your PostgreSQL Internal URL (from Step 2) |
 | `PORT` | `3000` |
 | `BASE_URL` | `https://your-app-name.onrender.com` (your Render URL) |
 
-> ⚠️ **Important:** Replace `reviewbot` in BASE_URL with your actual Render service name.
+> ⚠️ **Important:** The `DATABASE_URL` must use the **Internal Database URL** for best performance.
 
 ---
 
@@ -82,31 +96,31 @@ In the Render dashboard, go to **Environment** and add these variables:
 
 1. Click **"Create Web Service"**
 2. Wait for the build to complete (2-3 minutes)
-3. Once deployed, you'll see a URL like `https://reviewbot.onrender.com`
+3. Check logs for "📦 PostgreSQL database initialized"
+4. Once deployed, you'll see a URL like `https://reviewbot.onrender.com`
 
 ---
 
-## Step 6: Update Slack App Settings (Optional)
-
-If you're not using Socket Mode, you'll need to update your Slack app:
-
-1. Go to [api.slack.com/apps](https://api.slack.com/apps)
-2. Select your app
-3. Under **Event Subscriptions**, set Request URL to:
-   ```
-   https://reviewbot.onrender.com/slack/events
-   ```
-
-> **Note:** Since we're using Socket Mode, this step is **not required**. Socket Mode connects directly to Slack without needing a public URL for events.
-
----
-
-## Step 7: Test the Deployment
+## Step 6: Test the Deployment
 
 1. Upload a video to your Slack workspace
 2. You should see the "🎬 Review Video" button
 3. Click it to open the video player (now hosted on Render)
 4. Add comments and verify they sync to Slack
+5. **Verify persistence:** Redeploy and confirm old videos are still accessible
+
+---
+
+## Database Modes
+
+The application automatically detects which database to use:
+
+| Mode | Condition | Database |
+|------|-----------|----------|
+| **Production** | `DATABASE_URL` is set | PostgreSQL |
+| **Development** | `DATABASE_URL` not set | SQLite (file-based) |
+
+For local development, you don't need to configure anything - SQLite is used automatically.
 
 ---
 
@@ -121,6 +135,11 @@ If you're not using Socket Mode, you'll need to update your Slack app:
 - Check that `BASE_URL` is set correctly
 - Verify the video proxy is working in logs
 
+### "Video not found" error?
+- Ensure `DATABASE_URL` is set correctly
+- Check that PostgreSQL database was created successfully
+- Look for "📦 PostgreSQL database initialized" in logs
+
 ### Free tier sleeping?
 - Render's free tier sleeps after 15 minutes of inactivity
 - The bot will wake up when a request comes in (may take 30-60 seconds)
@@ -131,7 +150,7 @@ If you're not using Socket Mode, you'll need to update your Slack app:
 ## Production Recommendations
 
 1. **Upgrade to Starter tier** - Always-on, no sleep
-2. **Add persistent storage** - For SQLite database to persist across deploys
+2. **Use PostgreSQL** - Already configured for data persistence
 3. **Set up monitoring** - Use Render's built-in metrics or add error tracking
 
 ---
@@ -143,3 +162,4 @@ If you're not using Socket Mode, you'll need to update your Slack app:
 | Render Dashboard | [dashboard.render.com](https://dashboard.render.com) |
 | Slack App Settings | [api.slack.com/apps](https://api.slack.com/apps) |
 | Your Video Player | `https://YOUR-APP.onrender.com/review?video=ID` |
+

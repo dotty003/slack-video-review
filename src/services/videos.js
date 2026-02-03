@@ -51,7 +51,7 @@ function detectVideoUrl(text) {
  * @param {object} params - Video parameters
  * @returns {object} - Created video record
  */
-function registerVideo({
+async function registerVideo({
     channelId,
     messageTs,
     threadTs,
@@ -60,15 +60,15 @@ function registerVideo({
     videoType,
 }) {
     // First try to update existing
-    const existing = getVideoByMessage(channelId, messageTs);
+    const existing = await getVideoByMessage(channelId, messageTs);
 
     if (existing) {
         const updateStmt = prepare(`
       UPDATE videos SET video_url = ?, video_type = ?
       WHERE channel_id = ? AND message_ts = ?
     `);
-        updateStmt.run(videoUrl || null, videoType, channelId, messageTs);
-        return getVideoByMessage(channelId, messageTs);
+        await updateStmt.run(videoUrl || null, videoType, channelId, messageTs);
+        return await getVideoByMessage(channelId, messageTs);
     }
 
     // Insert new
@@ -77,7 +77,7 @@ function registerVideo({
     VALUES (?, ?, ?, ?, ?, ?)
   `);
 
-    stmt.run(
+    await stmt.run(
         channelId,
         messageTs,
         threadTs || null,
@@ -86,7 +86,7 @@ function registerVideo({
         videoType
     );
 
-    return getVideoByMessage(channelId, messageTs);
+    return await getVideoByMessage(channelId, messageTs);
 }
 
 /**
@@ -95,13 +95,13 @@ function registerVideo({
  * @param {string} messageTs - Message timestamp
  * @returns {object|null} - Video record or null
  */
-function getVideoByMessage(channelId, messageTs) {
+async function getVideoByMessage(channelId, messageTs) {
     const stmt = prepare(`
     SELECT * FROM videos 
     WHERE channel_id = ? AND message_ts = ?
   `);
 
-    return stmt.get(channelId, messageTs);
+    return await stmt.get(channelId, messageTs);
 }
 
 /**
@@ -110,9 +110,9 @@ function getVideoByMessage(channelId, messageTs) {
  * @param {string} threadTs - Thread timestamp
  * @returns {object|null} - Video record or null
  */
-function getVideoByThread(channelId, threadTs) {
+async function getVideoByThread(channelId, threadTs) {
     // First try to find by message_ts (original video post)
-    let video = getVideoByMessage(channelId, threadTs);
+    let video = await getVideoByMessage(channelId, threadTs);
 
     if (!video) {
         // Try to find by thread_ts
@@ -120,7 +120,7 @@ function getVideoByThread(channelId, threadTs) {
       SELECT * FROM videos 
       WHERE channel_id = ? AND thread_ts = ?
     `);
-        video = stmt.get(channelId, threadTs);
+        video = await stmt.get(channelId, threadTs);
     }
 
     return video;
@@ -131,9 +131,9 @@ function getVideoByThread(channelId, threadTs) {
  * @param {number} videoId - Video ID
  * @returns {object|null} - Video record or null
  */
-function getVideoById(videoId) {
+async function getVideoById(videoId) {
     const stmt = prepare('SELECT * FROM videos WHERE id = ?');
-    return stmt.get(videoId);
+    return await stmt.get(videoId);
 }
 
 module.exports = {

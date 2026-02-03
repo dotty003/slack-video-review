@@ -14,17 +14,17 @@ function createApiRouter(slackClient) {
     const router = express.Router();
 
     // Get video info with comments
-    router.get('/video/:id', (req, res) => {
+    router.get('/video/:id', async (req, res) => {
         try {
             const videoId = parseInt(req.params.id, 10);
-            const video = getVideoById(videoId);
+            const video = await getVideoById(videoId);
 
             if (!video) {
                 return res.status(404).json({ error: 'Video not found' });
             }
 
-            const comments = commentsService.getComments(videoId);
-            const status = commentsService.getStatus(videoId);
+            const comments = await commentsService.getComments(videoId);
+            const status = await commentsService.getStatus(videoId);
 
             // Return video with proxy URL instead of direct Slack URL
             res.json({
@@ -46,7 +46,7 @@ function createApiRouter(slackClient) {
     router.get('/video/:id/stream', async (req, res) => {
         try {
             const videoId = parseInt(req.params.id, 10);
-            const video = getVideoById(videoId);
+            const video = await getVideoById(videoId);
 
             if (!video || !video.video_url) {
                 return res.status(404).send('Video not found');
@@ -142,14 +142,14 @@ function createApiRouter(slackClient) {
                 return res.status(400).json({ error: 'Missing required fields' });
             }
 
-            const video = getVideoById(videoId);
+            const video = await getVideoById(videoId);
             if (!video) {
                 return res.status(404).json({ error: 'Video not found' });
             }
 
             // Add comment to database
             // Use userName as userId for web comments so it displays correctly
-            const comment = commentsService.addComment({
+            const comment = await commentsService.addComment({
                 videoId,
                 userId: userId || userName || 'web-user',
                 timestampSeconds: parseInt(timestampSeconds, 10),
@@ -181,10 +181,10 @@ function createApiRouter(slackClient) {
     });
 
     // Resolve comment
-    router.patch('/comments/:id/resolve', (req, res) => {
+    router.patch('/comments/:id/resolve', async (req, res) => {
         try {
             const commentId = parseInt(req.params.id, 10);
-            const success = commentsService.resolveComment(commentId);
+            const success = await commentsService.resolveComment(commentId);
 
             if (success) {
                 res.json({ success: true });
@@ -198,10 +198,10 @@ function createApiRouter(slackClient) {
     });
 
     // Unresolve comment
-    router.patch('/comments/:id/unresolve', (req, res) => {
+    router.patch('/comments/:id/unresolve', async (req, res) => {
         try {
             const commentId = parseInt(req.params.id, 10);
-            const success = commentsService.unresolveComment(commentId);
+            const success = await commentsService.unresolveComment(commentId);
 
             if (success) {
                 res.json({ success: true });
