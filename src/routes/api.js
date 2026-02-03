@@ -138,7 +138,7 @@ function createApiRouter(slackClient) {
             const videoId = parseInt(req.params.id, 10);
             const { userId, userName, timestampSeconds, commentText, attachmentUrl } = req.body;
 
-            if (!commentText || timestampSeconds === undefined) {
+            if ((!commentText && !attachmentUrl) || timestampSeconds === undefined) {
                 return res.status(400).json({ error: 'Missing required fields' });
             }
 
