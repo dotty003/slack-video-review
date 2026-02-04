@@ -28,7 +28,8 @@ const expressApp = express();
 
 // Middleware
 expressApp.use(cors());
-expressApp.use(express.json());
+expressApp.use(express.json({ limit: '50mb' }));
+expressApp.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Serve static files (video player UI)
 expressApp.use(express.static(path.join(__dirname, '../public')));
