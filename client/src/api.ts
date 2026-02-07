@@ -21,7 +21,8 @@ export async function addComment(
     userName: string,
     timestampSeconds: number,
     commentText: string,
-    attachmentUrl?: string | null
+    attachmentUrl?: string | null,
+    attachmentFilename?: string | null
 ): Promise<{ success: boolean; comment: Comment }> {
     const response = await fetch(`${API_BASE}/video/${videoId}/comments`, {
         method: 'POST',
@@ -31,6 +32,7 @@ export async function addComment(
             timestampSeconds,
             commentText,
             attachmentUrl,
+            attachmentFilename,
         }),
     });
     if (!response.ok) {

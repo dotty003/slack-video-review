@@ -13,6 +13,7 @@ export interface Comment {
     timestamp_seconds: number;
     comment_text: string;
     attachment_url?: string | null;
+    attachment_filename?: string | null;
     resolved: number;
     created_at: string;
 }

@@ -50,15 +50,24 @@ async function initPostgres() {
                 timestamp_seconds INTEGER NOT NULL,
                 comment_text TEXT NOT NULL,
                 attachment_url TEXT,
+                attachment_filename TEXT,
                 resolved INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
-        
+
         // Add attachment_url column if it doesn't exist (for existing databases)
         await client.query(`
             DO $$ BEGIN
                 ALTER TABLE comments ADD COLUMN IF NOT EXISTS attachment_url TEXT;
+            EXCEPTION WHEN duplicate_column THEN NULL;
+            END $$;
+        `);
+
+        // Add attachment_filename column if it doesn't exist (for existing databases)
+        await client.query(`
+            DO $$ BEGIN
+                ALTER TABLE comments ADD COLUMN IF NOT EXISTS attachment_filename TEXT;
             EXCEPTION WHEN duplicate_column THEN NULL;
             END $$;
         `);

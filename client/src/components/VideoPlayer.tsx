@@ -8,7 +8,7 @@ interface VideoPlayerProps {
     onTimeUpdate: (time: number) => void;
     comments: Comment[];
     videoRef: React.RefObject<HTMLVideoElement | null>;
-    onAddComment: (text: string, attachmentUrl?: string) => void;
+    onAddComment: (text: string, attachmentUrl?: string, attachmentFilename?: string) => void;
 }
 
 type AnnotationTool = 'pen' | 'rect' | 'circle';
@@ -280,7 +280,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
 
     const confirmSaveComment = () => {
         if (screenshot) {
-            onAddComment(commentText, screenshot);
+            // For annotation screenshots, generate a timestamped filename
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            onAddComment(commentText, screenshot, `annotation-${timestamp}.png`);
         }
         setShowSaveModal(false);
         setScreenshot(null);

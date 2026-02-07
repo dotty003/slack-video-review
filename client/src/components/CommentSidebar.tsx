@@ -7,7 +7,7 @@ interface CommentSidebarProps {
     comments: Comment[];
     currentTime: number;
     onSeek: (time: number) => void;
-    onAddComment: (text: string, attachmentUrl?: string) => void;
+    onAddComment: (text: string, attachmentUrl?: string, attachmentFilename?: string) => void;
     onResolveComment: (id: number) => void;
     onDeleteComment: (id: number) => void;
     currentUser: User;
@@ -26,6 +26,7 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
 }) => {
     const [newCommentText, setNewCommentText] = useState('');
     const [attachment, setAttachment] = useState<string | null>(null);
+    const [attachmentFilename, setAttachmentFilename] = useState<string | null>(null);
     const [filter, setFilter] = useState<'all' | 'open' | 'resolved'>('all');
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -42,9 +43,10 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (newCommentText.trim() || attachment) {
-            onAddComment(newCommentText, attachment || undefined);
+            onAddComment(newCommentText, attachment || undefined, attachmentFilename || undefined);
             setNewCommentText('');
             setAttachment(null);
+            setAttachmentFilename(null);
             setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
         }
     };
@@ -52,6 +54,8 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            // Store the original filename
+            setAttachmentFilename(file.name);
             const reader = new FileReader();
             reader.onloadend = () => {
                 setAttachment(reader.result as string);
@@ -171,7 +175,7 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
                                                 // Create a download link for the base64 image
                                                 const link = document.createElement('a');
                                                 link.href = comment.attachment_url!;
-                                                link.download = `annotation-${comment.id}.png`;
+                                                link.download = comment.attachment_filename || `attachment-${comment.id}.png`;
                                                 document.body.appendChild(link);
                                                 link.click();
                                                 document.body.removeChild(link);
@@ -229,7 +233,10 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
                     <div className="mb-3 relative inline-block">
                         <img src={attachment} alt="Preview" className="h-20 w-auto rounded-lg border border-gray-200 object-cover" />
                         <button
-                            onClick={() => setAttachment(null)}
+                            onClick={() => {
+                                setAttachment(null);
+                                setAttachmentFilename(null);
+                            }}
                             className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors"
                         >
                             <X className="w-3 h-3" />

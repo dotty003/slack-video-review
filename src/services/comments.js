@@ -5,13 +5,13 @@ const { prepare } = require('../database/db');
  * @param {object} params - Comment parameters
  * @returns {object} - Created comment record
  */
-async function addComment({ videoId, userId, timestampSeconds, commentText, attachmentUrl = null }) {
+async function addComment({ videoId, userId, timestampSeconds, commentText, attachmentUrl = null, attachmentFilename = null }) {
   const stmt = prepare(`
-    INSERT INTO comments (video_id, user_id, timestamp_seconds, comment_text, attachment_url)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO comments (video_id, user_id, timestamp_seconds, comment_text, attachment_url, attachment_filename)
+    VALUES (?, ?, ?, ?, ?, ?)
   `);
 
-  const result = await stmt.run(videoId, userId, timestampSeconds, commentText, attachmentUrl);
+  const result = await stmt.run(videoId, userId, timestampSeconds, commentText, attachmentUrl, attachmentFilename);
 
   // Return a constructed comment object
   return {
@@ -21,6 +21,7 @@ async function addComment({ videoId, userId, timestampSeconds, commentText, atta
     timestamp_seconds: timestampSeconds,
     comment_text: commentText,
     attachment_url: attachmentUrl,
+    attachment_filename: attachmentFilename,
     resolved: 0,
     created_at: new Date().toISOString(),
   };

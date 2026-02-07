@@ -81,7 +81,7 @@ const App: React.FC = () => {
         }
     };
 
-    const handleAddComment = async (text: string, attachmentUrl?: string) => {
+    const handleAddComment = async (text: string, attachmentUrl?: string, attachmentFilename?: string) => {
         if (!activeVideo || !currentUser || !videoId) return;
 
         const timestampSeconds = Math.floor(videoRef.current?.currentTime || 0);
@@ -92,7 +92,8 @@ const App: React.FC = () => {
                 currentUser.name,
                 timestampSeconds,
                 text,
-                attachmentUrl
+                attachmentUrl,
+                attachmentFilename
             );
             // Refresh comments
             await loadVideoData(true);

@@ -136,7 +136,7 @@ function createApiRouter(slackClient) {
     router.post('/video/:id/comments', async (req, res) => {
         try {
             const videoId = parseInt(req.params.id, 10);
-            const { userId, userName, timestampSeconds, commentText, attachmentUrl } = req.body;
+            const { userId, userName, timestampSeconds, commentText, attachmentUrl, attachmentFilename } = req.body;
 
             if ((!commentText && !attachmentUrl) || timestampSeconds === undefined) {
                 return res.status(400).json({ error: 'Missing required fields' });
@@ -155,6 +155,7 @@ function createApiRouter(slackClient) {
                 timestampSeconds: parseInt(timestampSeconds, 10),
                 commentText,
                 attachmentUrl: attachmentUrl || null,
+                attachmentFilename: attachmentFilename || null,
             });
 
             // Post to Slack thread
