@@ -17,7 +17,13 @@ export function formatTime(seconds: number): string {
  * Format relative time (e.g., "2 hours ago")
  */
 export function formatRelativeTime(dateString: string): string {
-    const date = new Date(dateString);
+    // Handle SQLite date format (uses space instead of T)
+    // Convert "2026-01-31 15:54:42" to "2026-01-31T15:54:42Z"
+    const normalizedDate = dateString.includes('T')
+        ? dateString
+        : dateString.replace(' ', 'T') + 'Z';
+
+    const date = new Date(normalizedDate);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffSecs = Math.floor(diffMs / 1000);
