@@ -116,6 +116,26 @@ async function initSqlite() {
     const schema = fs.readFileSync(schemaPath, 'utf8');
     db.run(schema);
 
+    // Run migrations for existing databases - add columns if they don't exist
+    try {
+        // Check if attachment_url column exists
+        const columnsResult = db.exec("PRAGMA table_info(comments)");
+        const columns = columnsResult[0]?.values || [];
+        const columnNames = columns.map(col => col[1]);
+
+        if (!columnNames.includes('attachment_url')) {
+            db.run("ALTER TABLE comments ADD COLUMN attachment_url TEXT");
+            console.log('📦 Added attachment_url column to comments table');
+        }
+
+        if (!columnNames.includes('attachment_filename')) {
+            db.run("ALTER TABLE comments ADD COLUMN attachment_filename TEXT");
+            console.log('📦 Added attachment_filename column to comments table');
+        }
+    } catch (err) {
+        console.warn('Migration warning:', err.message);
+    }
+
     // Save database periodically
     setInterval(saveSqliteDatabase, 30000);
 
