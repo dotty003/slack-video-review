@@ -9,6 +9,8 @@ interface VideoPlayerProps {
     comments: Comment[];
     videoRef: React.RefObject<HTMLVideoElement | null>;
     onAddComment: (text: string, attachmentUrl?: string, attachmentFilename?: string) => void;
+    activeAnnotation?: string | null;
+    onClearAnnotation?: () => void;
 }
 
 type AnnotationTool = 'pen' | 'rect' | 'circle';
@@ -22,7 +24,7 @@ interface Shape {
     end?: { x: number; y: number };
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, videoRef, onAddComment }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, videoRef, onAddComment, activeAnnotation, onClearAnnotation }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -53,6 +55,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
             videoRef.current.pause();
         } else {
             if (isAnnotating) setIsAnnotating(false);
+            // Clear any active annotation overlay when playing
+            if (onClearAnnotation) onClearAnnotation();
             videoRef.current.play();
         }
         setIsPlaying(!isPlaying);
@@ -365,6 +369,27 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
                     onMouseUp={endDrawing}
                     onMouseLeave={endDrawing}
                 />
+            )}
+
+            {/* Active Annotation Overlay - shows saved annotation when clicking a comment */}
+            {activeAnnotation && !isAnnotating && (
+                <div
+                    className="absolute inset-0 z-20 flex items-center justify-center bg-black/50 cursor-pointer animate-in fade-in duration-200"
+                    onClick={onClearAnnotation}
+                    title="Click to dismiss"
+                >
+                    <div className="relative max-w-full max-h-full">
+                        <img
+                            src={activeAnnotation}
+                            alt="Annotation"
+                            className="max-w-full max-h-full object-contain shadow-2xl rounded-lg"
+                        />
+                        <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                            <X className="w-3 h-3" />
+                            Click to dismiss
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* Annotation Toolbar */}

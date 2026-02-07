@@ -6,7 +6,7 @@ import { formatTime, formatRelativeTime } from '../utils/formatters';
 interface CommentSidebarProps {
     comments: Comment[];
     currentTime: number;
-    onSeek: (time: number) => void;
+    onSeek: (time: number, annotationUrl?: string | null) => void;
     onAddComment: (text: string, attachmentUrl?: string, attachmentFilename?: string) => void;
     onResolveComment: (id: number) => void;
     onDeleteComment: (id: number) => void;
@@ -145,7 +145,7 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
                                         </div>
                                     </div>
                                     <button
-                                        onClick={() => onSeek(comment.timestamp_seconds)}
+                                        onClick={() => onSeek(comment.timestamp_seconds, comment.attachment_url)}
                                         className="flex items-center gap-1 text-wondr-blue hover:text-wondr-pink text-xs font-bold bg-wondr-lavender/30 hover:bg-wondr-lavender/50 px-2 py-1 rounded-full cursor-pointer transition-colors"
                                     >
                                         <Clock className="w-3 h-3" />

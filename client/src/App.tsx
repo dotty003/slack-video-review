@@ -40,6 +40,7 @@ const App: React.FC = () => {
     const [currentTime, setCurrentTime] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [activeAnnotation, setActiveAnnotation] = useState<string | null>(null);
 
     // Refs
     const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -74,11 +75,13 @@ const App: React.FC = () => {
         setCurrentTime(time);
     };
 
-    const handleSeek = (time: number) => {
+    const handleSeek = (time: number, annotationUrl?: string | null) => {
         if (videoRef.current) {
             videoRef.current.currentTime = time;
             videoRef.current.pause();
         }
+        // Show annotation overlay if available
+        setActiveAnnotation(annotationUrl || null);
     };
 
     const handleAddComment = async (text: string, attachmentUrl?: string, attachmentFilename?: string) => {
@@ -208,6 +211,8 @@ const App: React.FC = () => {
                             comments={comments}
                             videoRef={videoRef}
                             onAddComment={handleAddComment}
+                            activeAnnotation={activeAnnotation}
+                            onClearAnnotation={() => setActiveAnnotation(null)}
                         />
                     </div>
 
