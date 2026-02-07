@@ -94,8 +94,8 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
                             key={f}
                             onClick={() => setFilter(f)}
                             className={`flex-1 py-1.5 text-xs font-semibold rounded-full transition-all capitalize ${filter === f
-                                    ? 'bg-white text-wondr-pink shadow-sm ring-1 ring-black/5'
-                                    : 'text-gray-500 hover:text-gray-700'
+                                ? 'bg-white text-wondr-pink shadow-sm ring-1 ring-black/5'
+                                : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
                             {f}
@@ -121,8 +121,8 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
                             <div
                                 key={comment.id}
                                 className={`group relative flex flex-col p-4 rounded-wondr border transition-all duration-200 ${isActive
-                                        ? 'bg-white border-wondr-pink ring-2 ring-wondr-pink/20 shadow-md'
-                                        : 'bg-white border-gray-200 hover:border-wondr-lavender hover:shadow-sm'
+                                    ? 'bg-white border-wondr-pink ring-2 ring-wondr-pink/20 shadow-md'
+                                    : 'bg-white border-gray-200 hover:border-wondr-lavender hover:shadow-sm'
                                     } ${comment.resolved ? 'opacity-60 bg-gray-50' : ''}`}
                             >
                                 {/* Header Line */}
@@ -158,13 +158,32 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
 
                                 {/* Attachment */}
                                 {comment.attachment_url && (
-                                    <div className="mb-3 rounded-lg overflow-hidden border border-gray-100">
+                                    <div className="mb-3 rounded-lg overflow-hidden border border-gray-100 relative group/attachment">
                                         <img
                                             src={comment.attachment_url}
                                             alt="Attachment"
-                                            className="w-full h-auto object-cover max-h-48 cursor-pointer hover:scale-105 transition-transform"
-                                            onClick={() => window.open(comment.attachment_url!, '_blank')}
+                                            className="w-full h-auto object-cover max-h-48"
                                         />
+                                        {/* Download button overlay */}
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                // Create a download link for the base64 image
+                                                const link = document.createElement('a');
+                                                link.href = comment.attachment_url!;
+                                                link.download = `annotation-${comment.id}.png`;
+                                                document.body.appendChild(link);
+                                                link.click();
+                                                document.body.removeChild(link);
+                                            }}
+                                            className="absolute bottom-2 right-2 px-3 py-1.5 bg-wondr-pink text-white text-xs font-bold rounded-full shadow-lg opacity-0 group-hover/attachment:opacity-100 hover:bg-pink-600 transition-all flex items-center gap-1"
+                                            title="Download attachment"
+                                        >
+                                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                                            </svg>
+                                            Download
+                                        </button>
                                     </div>
                                 )}
 
@@ -181,8 +200,8 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
                                     <button
                                         onClick={() => onResolveComment(comment.id)}
                                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${comment.resolved
-                                                ? 'bg-green-100 text-green-600 hover:bg-green-200'
-                                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                            ? 'bg-green-100 text-green-600 hover:bg-green-200'
+                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                             }`}
                                     >
                                         {comment.resolved ? (
