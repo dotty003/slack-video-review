@@ -134,6 +134,24 @@ async function deleteComment(commentId) {
   return result.changes > 0;
 }
 
+/**
+ * Update Slack message info for a comment
+ * @param {number} commentId - Comment ID
+ * @param {string} slackMessageTs - Slack message timestamp
+ * @param {string} slackChannelId - Slack channel ID
+ * @returns {boolean} - Success
+ */
+async function updateSlackMessageInfo(commentId, slackMessageTs, slackChannelId) {
+  const stmt = prepare(`
+    UPDATE comments 
+    SET slack_message_ts = ?, slack_channel_id = ?
+    WHERE id = ?
+  `);
+
+  const result = await stmt.run(slackMessageTs, slackChannelId, commentId);
+  return result.changes > 0;
+}
+
 module.exports = {
   addComment,
   getCommentById,
@@ -143,4 +161,5 @@ module.exports = {
   getStatus,
   commentBelongsToVideo,
   deleteComment,
+  updateSlackMessageInfo,
 };

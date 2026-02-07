@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS comments (
     comment_text TEXT NOT NULL,
     attachment_url TEXT,
     attachment_filename TEXT,
+    slack_message_ts TEXT,
+    slack_channel_id TEXT,
     resolved INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (video_id) REFERENCES videos(id) ON DELETE CASCADE

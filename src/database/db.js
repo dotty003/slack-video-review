@@ -72,6 +72,22 @@ async function initPostgres() {
             END $$;
         `);
 
+        // Add slack_message_ts column if it doesn't exist (for Slack reactions)
+        await client.query(`
+            DO $$ BEGIN
+                ALTER TABLE comments ADD COLUMN IF NOT EXISTS slack_message_ts TEXT;
+            EXCEPTION WHEN duplicate_column THEN NULL;
+            END $$;
+        `);
+
+        // Add slack_channel_id column if it doesn't exist (for Slack reactions)
+        await client.query(`
+            DO $$ BEGIN
+                ALTER TABLE comments ADD COLUMN IF NOT EXISTS slack_channel_id TEXT;
+            EXCEPTION WHEN duplicate_column THEN NULL;
+            END $$;
+        `);
+
         // Create indexes
         await client.query(`
             CREATE INDEX IF NOT EXISTS idx_comments_video_id ON comments(video_id)
@@ -131,6 +147,16 @@ async function initSqlite() {
         if (!columnNames.includes('attachment_filename')) {
             db.run("ALTER TABLE comments ADD COLUMN attachment_filename TEXT");
             console.log('📦 Added attachment_filename column to comments table');
+        }
+
+        if (!columnNames.includes('slack_message_ts')) {
+            db.run("ALTER TABLE comments ADD COLUMN slack_message_ts TEXT");
+            console.log('📦 Added slack_message_ts column to comments table');
+        }
+
+        if (!columnNames.includes('slack_channel_id')) {
+            db.run("ALTER TABLE comments ADD COLUMN slack_channel_id TEXT");
+            console.log('📦 Added slack_channel_id column to comments table');
         }
     } catch (err) {
         console.warn('Migration warning:', err.message);

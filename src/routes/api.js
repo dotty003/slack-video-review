@@ -178,7 +178,16 @@ function createApiRouter(slackClient) {
                         messagePayload.text += '\n📎 _[Annotation attached - view in web player]_';
                     }
 
-                    await slackClient.chat.postMessage(messagePayload);
+                    const slackResult = await slackClient.chat.postMessage(messagePayload);
+
+                    // Store the Slack message info for later reactions (e.g., resolved emoji)
+                    if (slackResult.ok && slackResult.ts) {
+                        await commentsService.updateSlackMessageInfo(
+                            comment.id,
+                            slackResult.ts,
+                            video.channel_id
+                        );
+                    }
                 } catch (slackErr) {
                     console.error('Failed to post to Slack:', slackErr.message);
                 }
@@ -195,9 +204,31 @@ function createApiRouter(slackClient) {
     router.patch('/comments/:id/resolve', async (req, res) => {
         try {
             const commentId = parseInt(req.params.id, 10);
+
+            // Get comment first to retrieve Slack info for reaction
+            const comment = await commentsService.getCommentById(commentId);
+            if (!comment) {
+                return res.status(404).json({ error: 'Comment not found' });
+            }
+
             const success = await commentsService.resolveComment(commentId);
 
             if (success) {
+                // Add ✅ reaction to Slack message if we have the Slack info
+                if (slackClient && comment.slack_message_ts && comment.slack_channel_id) {
+                    try {
+                        await slackClient.reactions.add({
+                            channel: comment.slack_channel_id,
+                            timestamp: comment.slack_message_ts,
+                            name: 'white_check_mark', // ✅ emoji
+                        });
+                    } catch (slackErr) {
+                        // Ignore if reaction already exists or other Slack errors
+                        if (!slackErr.message?.includes('already_reacted')) {
+                            console.error('Failed to add Slack reaction:', slackErr.message);
+                        }
+                    }
+                }
                 res.json({ success: true });
             } else {
                 res.status(404).json({ error: 'Comment not found' });
@@ -212,9 +243,31 @@ function createApiRouter(slackClient) {
     router.patch('/comments/:id/unresolve', async (req, res) => {
         try {
             const commentId = parseInt(req.params.id, 10);
+
+            // Get comment first to retrieve Slack info for removing reaction
+            const comment = await commentsService.getCommentById(commentId);
+            if (!comment) {
+                return res.status(404).json({ error: 'Comment not found' });
+            }
+
             const success = await commentsService.unresolveComment(commentId);
 
             if (success) {
+                // Remove ✅ reaction from Slack message if we have the Slack info
+                if (slackClient && comment.slack_message_ts && comment.slack_channel_id) {
+                    try {
+                        await slackClient.reactions.remove({
+                            channel: comment.slack_channel_id,
+                            timestamp: comment.slack_message_ts,
+                            name: 'white_check_mark', // ✅ emoji
+                        });
+                    } catch (slackErr) {
+                        // Ignore if reaction doesn't exist or other Slack errors
+                        if (!slackErr.message?.includes('no_reaction')) {
+                            console.error('Failed to remove Slack reaction:', slackErr.message);
+                        }
+                    }
+                }
                 res.json({ success: true });
             } else {
                 res.status(404).json({ error: 'Comment not found' });
