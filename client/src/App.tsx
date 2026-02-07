@@ -77,7 +77,7 @@ const App: React.FC = () => {
     const handleSeek = (time: number) => {
         if (videoRef.current) {
             videoRef.current.currentTime = time;
-            videoRef.current.play();
+            videoRef.current.pause();
         }
     };
 
