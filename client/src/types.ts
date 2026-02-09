@@ -25,6 +25,7 @@ export interface Video {
     thread_ts?: string;
     uploader_id: string;
     video_url: string;
+    video_name?: string;
     video_type?: string;
     created_at: string;
 }

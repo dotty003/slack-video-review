@@ -172,9 +172,7 @@ const App: React.FC = () => {
     }
 
     // Extract title from video URL
-    const videoTitle = activeVideo.video_url
-        ? decodeURIComponent(activeVideo.video_url.split('/').pop()?.split('?')[0] || `Video #${videoId}`)
-        : `Video #${videoId}`;
+    const videoTitle = activeVideo.video_name || `Video #${videoId}`;
 
     // --- Render ---
     return (

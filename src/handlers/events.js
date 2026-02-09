@@ -32,6 +32,7 @@ async function handleFileShared({ client, event, baseUrl }) {
             threadTs: messageTs,
             uploaderId: file.user,
             videoUrl: file.url_private,
+            videoName: file.name,
             videoType: 'upload',
         });
 

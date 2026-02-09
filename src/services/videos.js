@@ -57,6 +57,7 @@ async function registerVideo({
     threadTs,
     uploaderId,
     videoUrl,
+    videoName,
     videoType,
 }) {
     // First try to update existing
@@ -64,17 +65,17 @@ async function registerVideo({
 
     if (existing) {
         const updateStmt = prepare(`
-      UPDATE videos SET video_url = ?, video_type = ?
+      UPDATE videos SET video_url = ?, video_name = ?, video_type = ?
       WHERE channel_id = ? AND message_ts = ?
     `);
-        await updateStmt.run(videoUrl || null, videoType, channelId, messageTs);
+        await updateStmt.run(videoUrl || null, videoName || null, videoType, channelId, messageTs);
         return await getVideoByMessage(channelId, messageTs);
     }
 
     // Insert new
     const stmt = prepare(`
-    INSERT INTO videos (channel_id, message_ts, thread_ts, uploader_id, video_url, video_type)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO videos (channel_id, message_ts, thread_ts, uploader_id, video_url, video_name, video_type)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
 
     await stmt.run(
@@ -83,6 +84,7 @@ async function registerVideo({
         threadTs || null,
         uploaderId,
         videoUrl || null,
+        videoName || null,
         videoType
     );
 

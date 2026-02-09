@@ -56,6 +56,14 @@ async function initPostgres() {
             )
         `);
 
+        // Add video_name column if it doesn't exist (for existing databases)
+        await client.query(`
+            DO $$ BEGIN
+                ALTER TABLE videos ADD COLUMN IF NOT EXISTS video_name TEXT;
+            EXCEPTION WHEN duplicate_column THEN NULL;
+            END $$;
+        `);
+
         // Add attachment_url column if it doesn't exist (for existing databases)
         await client.query(`
             DO $$ BEGIN
@@ -157,6 +165,16 @@ async function initSqlite() {
         if (!columnNames.includes('slack_channel_id')) {
             db.run("ALTER TABLE comments ADD COLUMN slack_channel_id TEXT");
             console.log('📦 Added slack_channel_id column to comments table');
+        }
+
+        // Check videos table for video_name column
+        const videosColumnsResult = db.exec("PRAGMA table_info(videos)");
+        const videoColumns = videosColumnsResult[0]?.values || [];
+        const videoColumnNames = videoColumns.map(col => col[1]);
+
+        if (!videoColumnNames.includes('video_name')) {
+            db.run("ALTER TABLE videos ADD COLUMN video_name TEXT");
+            console.log('📦 Added video_name column to videos table');
         }
     } catch (err) {
         console.warn('Migration warning:', err.message);

@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS videos (
     thread_ts TEXT,
     uploader_id TEXT NOT NULL,
     video_url TEXT,
+    video_name TEXT,
     video_type TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(channel_id, message_ts)
