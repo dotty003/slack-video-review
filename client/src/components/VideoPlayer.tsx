@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, PenTool, Eraser, Square, Circle, Undo, MessageSquarePlus, X, Check, Maximize } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, PenTool, Eraser, Square, Circle, Undo, MessageSquarePlus, X, Check, Maximize, MoveUpRight } from 'lucide-react';
 import { formatTime } from '../utils/formatters';
 import { Comment } from '../types';
 
@@ -13,7 +13,7 @@ interface VideoPlayerProps {
     onClearAnnotation?: () => void;
 }
 
-type AnnotationTool = 'pen' | 'rect' | 'circle';
+type AnnotationTool = 'pen' | 'rect' | 'circle' | 'arrow';
 type AnnotationColor = '#FF5BA3' | '#0000EE' | '#FFFFFF' | '#FACC15';
 
 interface Shape {
@@ -355,6 +355,26 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
             } else if (shape.tool === 'circle' && shape.start && shape.end) {
                 const radius = Math.sqrt(Math.pow(shape.end.x - shape.start.x, 2) + Math.pow(shape.end.y - shape.start.y, 2));
                 ctx.arc(shape.start.x, shape.start.y, radius, 0, 2 * Math.PI);
+            } else if (shape.tool === 'arrow' && shape.start && shape.end) {
+                // Draw arrow line
+                ctx.moveTo(shape.start.x, shape.start.y);
+                ctx.lineTo(shape.end.x, shape.end.y);
+                ctx.stroke();
+
+                // Draw arrowhead
+                const angle = Math.atan2(shape.end.y - shape.start.y, shape.end.x - shape.start.x);
+                const headLength = 15;
+                ctx.beginPath();
+                ctx.moveTo(shape.end.x, shape.end.y);
+                ctx.lineTo(
+                    shape.end.x - headLength * Math.cos(angle - Math.PI / 6),
+                    shape.end.y - headLength * Math.sin(angle - Math.PI / 6)
+                );
+                ctx.moveTo(shape.end.x, shape.end.y);
+                ctx.lineTo(
+                    shape.end.x - headLength * Math.cos(angle + Math.PI / 6),
+                    shape.end.y - headLength * Math.sin(angle + Math.PI / 6)
+                );
             }
             ctx.stroke();
         };
@@ -427,6 +447,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
                         </button>
                         <button onClick={() => setCurrentTool('circle')} className={`p-2 rounded-full transition-colors ${currentTool === 'circle' ? 'bg-wondr-pink text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Circle className="w-5 h-5" />
+                        </button>
+                        <button onClick={() => setCurrentTool('arrow')} className={`p-2 rounded-full transition-colors ${currentTool === 'arrow' ? 'bg-wondr-pink text-white' : 'text-gray-600 hover:bg-gray-100'}`} title="Arrow">
+                            <MoveUpRight className="w-5 h-5" />
                         </button>
                     </div>
 
