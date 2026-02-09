@@ -28,6 +28,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [duration, setDuration] = useState(0);
+    const [volume, setVolume] = useState(1);
     const [isMuted, setIsMuted] = useState(false);
     const [showControls, setShowControls] = useState(true);
 
@@ -97,8 +98,29 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
 
     const toggleMute = () => {
         if (!videoRef.current) return;
-        videoRef.current.muted = !isMuted;
-        setIsMuted(!isMuted);
+        const newMuted = !isMuted;
+        videoRef.current.muted = newMuted;
+        setIsMuted(newMuted);
+        // When unmuting, restore volume; when muting, keep volume state
+        if (!newMuted && volume === 0) {
+            setVolume(0.5);
+            videoRef.current.volume = 0.5;
+        }
+    };
+
+    const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!videoRef.current) return;
+        const newVolume = parseFloat(e.target.value);
+        setVolume(newVolume);
+        videoRef.current.volume = newVolume;
+        // Auto-mute/unmute based on volume
+        if (newVolume === 0) {
+            setIsMuted(true);
+            videoRef.current.muted = true;
+        } else if (isMuted) {
+            setIsMuted(false);
+            videoRef.current.muted = false;
+        }
     };
 
     const skip = (seconds: number) => {
@@ -556,9 +578,22 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
 
                         <div className="w-px h-6 bg-gray-600/50 mx-2"></div>
 
-                        <button onClick={toggleMute} className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-300 hover:text-white">
-                            {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
-                        </button>
+                        <div className="flex items-center gap-2 group/volume">
+                            <button onClick={toggleMute} className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-300 hover:text-white">
+                                {isMuted || volume === 0 ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+                            </button>
+                            <div className="w-0 overflow-hidden group-hover/volume:w-24 transition-all duration-300">
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="1"
+                                    step="0.05"
+                                    value={isMuted ? 0 : volume}
+                                    onChange={handleVolumeChange}
+                                    className="w-24 h-1 bg-gray-600 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:hover:bg-wondr-pink [&::-webkit-slider-thumb]:transition-colors"
+                                />
+                            </div>
+                        </div>
 
                         <button onClick={toggleFullscreen} className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-300 hover:text-white" title="Fullscreen">
                             <Maximize className="w-6 h-6" />
