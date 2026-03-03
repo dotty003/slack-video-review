@@ -1,16 +1,55 @@
 import { VideoResponse, Comment } from './types';
 
+// Extract token from URL query params (set once on page load)
+const urlParams = new URLSearchParams(window.location.search);
+const REVIEW_TOKEN = urlParams.get('token') || '';
+const VIDEO_ID = urlParams.get('video') || '';
+
 const API_BASE = '/api';
+
+/**
+ * Build query string with auth token
+ */
+function authParams(extra: Record<string, string> = {}): string {
+    const params = new URLSearchParams({
+        token: REVIEW_TOKEN,
+        _t: Date.now().toString(),
+        ...extra,
+    });
+    return params.toString();
+}
+
+/**
+ * Build query string for comment endpoints (need videoId)
+ */
+function commentAuthParams(extra: Record<string, string> = {}): string {
+    const params = new URLSearchParams({
+        token: REVIEW_TOKEN,
+        videoId: VIDEO_ID,
+        ...extra,
+    });
+    return params.toString();
+}
 
 /**
  * Fetch video data and comments
  */
 export async function getVideo(videoId: number): Promise<VideoResponse> {
-    const response = await fetch(`${API_BASE}/video/${videoId}?_t=${Date.now()}`);
+    const response = await fetch(`${API_BASE}/video/${videoId}?${authParams()}`);
     if (!response.ok) {
+        if (response.status === 401) {
+            throw new Error('This review link has expired or is invalid. Please request a new link from Slack.');
+        }
         throw new Error('Video not found');
     }
     return response.json();
+}
+
+/**
+ * Get the authenticated video stream URL
+ */
+export function getStreamUrl(videoId: number): string {
+    return `${API_BASE}/video/${videoId}/stream?token=${encodeURIComponent(REVIEW_TOKEN)}`;
 }
 
 /**
@@ -24,7 +63,7 @@ export async function addComment(
     attachmentUrl?: string | null,
     attachmentFilename?: string | null
 ): Promise<{ success: boolean; comment: Comment }> {
-    const response = await fetch(`${API_BASE}/video/${videoId}/comments`, {
+    const response = await fetch(`${API_BASE}/video/${videoId}/comments?token=${encodeURIComponent(REVIEW_TOKEN)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -36,6 +75,9 @@ export async function addComment(
         }),
     });
     if (!response.ok) {
+        if (response.status === 401) {
+            throw new Error('Session expired. Please request a new review link from Slack.');
+        }
         throw new Error('Failed to add comment');
     }
     return response.json();
@@ -45,7 +87,7 @@ export async function addComment(
  * Resolve a comment
  */
 export async function resolveComment(commentId: number): Promise<{ success: boolean }> {
-    const response = await fetch(`${API_BASE}/comments/${commentId}/resolve`, {
+    const response = await fetch(`${API_BASE}/comments/${commentId}/resolve?${commentAuthParams()}`, {
         method: 'PATCH',
     });
     if (!response.ok) {
@@ -58,7 +100,7 @@ export async function resolveComment(commentId: number): Promise<{ success: bool
  * Unresolve a comment
  */
 export async function unresolveComment(commentId: number): Promise<{ success: boolean }> {
-    const response = await fetch(`${API_BASE}/comments/${commentId}/unresolve`, {
+    const response = await fetch(`${API_BASE}/comments/${commentId}/unresolve?${commentAuthParams()}`, {
         method: 'PATCH',
     });
     if (!response.ok) {
@@ -71,11 +113,18 @@ export async function unresolveComment(commentId: number): Promise<{ success: bo
  * Delete a comment
  */
 export async function deleteComment(commentId: number): Promise<{ success: boolean }> {
-    const response = await fetch(`${API_BASE}/comments/${commentId}`, {
+    const response = await fetch(`${API_BASE}/comments/${commentId}?${commentAuthParams()}`, {
         method: 'DELETE',
     });
     if (!response.ok) {
         throw new Error('Failed to delete comment');
     }
     return response.json();
+}
+
+/**
+ * Check if the current session has a valid token
+ */
+export function hasValidToken(): boolean {
+    return REVIEW_TOKEN.length > 0 && VIDEO_ID.length > 0;
 }

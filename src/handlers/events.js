@@ -1,4 +1,5 @@
 const { isVideoFile, detectVideoUrl, registerVideo, getVideoByMessage } = require('../services/videos');
+const { generateReviewToken } = require('../middleware/auth');
 
 /**
  * Handle file_shared events to detect video uploads
@@ -53,7 +54,7 @@ async function handleFileShared({ client, event, baseUrl }) {
 
         // Post the Review Video button
         if (video && baseUrl) {
-            const reviewUrl = `${baseUrl}/review?video=${video.id}`;
+            const reviewUrl = `${baseUrl}/review?video=${video.id}&token=${generateReviewToken(video.id)}`;
 
             await client.chat.postMessage({
                 channel: channel_id,

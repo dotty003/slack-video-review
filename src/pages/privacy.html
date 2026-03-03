@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy — WONDR Review</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            color: #1a1a2e;
+            background: #fafafa;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+
+        .brand {
+            color: #FF5BA3;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .updated {
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 36px;
+            margin-bottom: 12px;
+            color: #1a1a2e;
+        }
+
+        p,
+        li {
+            font-size: 0.95rem;
+            color: #444;
+            margin-bottom: 12px;
+        }
+
+        ul {
+            padding-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        a {
+            color: #FF5BA3;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid #eee;
+            margin: 40px 0;
+        }
+
+        .footer {
+            text-align: center;
+            color: #aaa;
+            font-size: 0.8rem;
+            margin-top: 60px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="brand">WONDR Review</div>
+        <h1>Privacy Policy</h1>
+        <p class="updated">Last updated: March 3, 2026</p>
+
+        <h2>1. Introduction</h2>
+        <p>WONDR Review ("we", "our", "us") provides a Slack-integrated video review tool. This Privacy Policy explains
+            how we collect, use, and protect information when you use our service.</p>
+
+        <h2>2. Information We Collect</h2>
+        <p>We collect the following information through your use of the WONDR Review Slack app and web player:</p>
+        <ul>
+            <li><strong>Slack User Information:</strong> Your Slack user ID, display name, and workspace ID. We receive
+                this from Slack's API when you interact with the bot.</li>
+            <li><strong>Video Metadata:</strong> Channel ID, message timestamp, uploader ID, video URL, and video
+                filename. We do <strong>not</strong> store video file content — videos remain hosted on Slack or
+                external platforms.</li>
+            <li><strong>Comments:</strong> Timestamped review comments and optional annotation screenshots you submit
+                through the web player.</li>
+            <li><strong>Web Player Session:</strong> The name you enter when joining a review session.</li>
+        </ul>
+
+        <h2>3. How We Use Your Information</h2>
+        <p>We use collected information solely to:</p>
+        <ul>
+            <li>Provide the video review and commenting functionality</li>
+            <li>Sync comments between the web player and Slack threads</li>
+            <li>Display reviewer names alongside their comments</li>
+            <li>Track comment resolution status</li>
+        </ul>
+        <p>We do <strong>not</strong> sell, share, or monetize your personal information.</p>
+
+        <h2>4. Slack API Data</h2>
+        <p>Our app accesses the following Slack API scopes:</p>
+        <ul>
+            <li><strong>channels:history, channels:read</strong> — To detect videos shared in channels</li>
+            <li><strong>chat:write</strong> — To post review comments back to Slack threads</li>
+            <li><strong>files:read</strong> — To stream video files through our secure proxy</li>
+            <li><strong>users:read</strong> — To display reviewer names</li>
+            <li><strong>reactions:write, reactions:read</strong> — To add/remove ✅ reactions on resolved comments</li>
+        </ul>
+        <p>We comply with the <a href="https://api.slack.com/developer-policy" target="_blank">Slack API Terms of
+                Service</a>.</p>
+
+        <h2>5. Data Storage & Security</h2>
+        <p>Data is stored in a PostgreSQL database hosted on Render. Video files are <strong>never</strong> stored on
+            our servers — they are streamed directly from Slack or the original hosting platform through an
+            authenticated proxy.</p>
+        <p>Review link URLs contain time-limited, cryptographically signed tokens that expire after 7 days.</p>
+
+        <h2>6. Data Retention</h2>
+        <p>We retain video metadata and comments for as long as the associated Slack workspace has the app installed.
+            Upon uninstallation, workspace data may be deleted.</p>
+
+        <h2>7. Your Rights</h2>
+        <p>You have the right to:</p>
+        <ul>
+            <li>Request access to your data</li>
+            <li>Request deletion of your comments or data</li>
+            <li>Uninstall the app, which will remove workspace access</li>
+        </ul>
+
+        <h2>8. Third-Party Services</h2>
+        <p>We use the following third-party services:</p>
+        <ul>
+            <li><strong>Slack</strong> — Messaging platform and API</li>
+            <li><strong>Render</strong> — Application and database hosting</li>
+        </ul>
+
+        <h2>9. Changes to This Policy</h2>
+        <p>We may update this policy from time to time. Changes will be reflected on this page with an updated date.</p>
+
+        <h2>10. Contact</h2>
+        <p>For privacy inquiries, contact us at: <a href="mailto:privacy@wondr.review">privacy@wondr.review</a></p>
+
+        <hr class="divider">
+        <p class="footer">&copy; 2026 WONDR Review. All rights reserved.</p>
+    </div>
+</body>
+
+</html>

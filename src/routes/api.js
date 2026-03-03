@@ -2,19 +2,53 @@ const express = require('express');
 const https = require('https');
 const http = require('http');
 const { URL } = require('url');
+const { WebClient } = require('@slack/web-api');
 const commentsService = require('../services/comments');
 const { getVideoById } = require('../services/videos');
 const config = require('../config');
+const { requireReviewAuth, requireCommentAuth } = require('../middleware/auth');
+const { getBotTokenForTeam } = require('../database/installationStore');
 
 /**
  * Create API router
- * @param {object} slackClient - Slack client for posting messages
+ * @param {object} slackApp - Bolt.js App instance
  */
-function createApiRouter(slackClient) {
+function createApiRouter(slackApp) {
     const router = express.Router();
 
+    /**
+     * Get a Slack WebClient for a specific video's workspace.
+     * In OAuth mode, fetches the workspace token from the installations table.
+     * In legacy mode, uses the default app client.
+     */
+    async function getSlackClientForVideo(videoId) {
+        const video = await getVideoById(videoId);
+        if (!video) return null;
+
+        // Try to get workspace-specific token
+        // We need team_id — look it up from the video's channel context
+        // For now, try the installations table; fall back to the app's default client
+        try {
+            const { WebClient } = require('@slack/web-api');
+            // Try to find the installation for this video's workspace
+            const installations = require('../database/installationStore');
+            const allInstalls = await installations.getAllInstallations();
+            // If we have installations, use the first matching one
+            // In a full implementation, videos would store team_id
+            if (allInstalls.length > 0) {
+                const token = await installations.getBotTokenForTeam(allInstalls[0].team_id);
+                if (token) return new WebClient(token);
+            }
+        } catch (e) {
+            // WebClient not available or no installations — fall back
+        }
+
+        // Fallback: use the Bolt app's default client (legacy mode)
+        return slackApp.client || null;
+    }
+
     // Get video info with comments
-    router.get('/video/:id', async (req, res) => {
+    router.get('/video/:id', requireReviewAuth, async (req, res) => {
         try {
             const videoId = parseInt(req.params.id, 10);
             const video = await getVideoById(videoId);
@@ -43,7 +77,7 @@ function createApiRouter(slackClient) {
     });
 
     // Proxy video stream from Slack (handles authentication)
-    router.get('/video/:id/stream', async (req, res) => {
+    router.get('/video/:id/stream', requireReviewAuth, async (req, res) => {
         try {
             const videoId = parseInt(req.params.id, 10);
             const video = await getVideoById(videoId);
@@ -133,7 +167,7 @@ function createApiRouter(slackClient) {
     });
 
     // Add comment from web UI
-    router.post('/video/:id/comments', async (req, res) => {
+    router.post('/video/:id/comments', requireReviewAuth, async (req, res) => {
         try {
             const videoId = parseInt(req.params.id, 10);
             const { userId, userName, timestampSeconds, commentText, attachmentUrl, attachmentFilename } = req.body;
@@ -159,34 +193,35 @@ function createApiRouter(slackClient) {
             });
 
             // Post to Slack thread
-            if (slackClient && video.channel_id && video.message_ts) {
+            if (video.channel_id && video.message_ts) {
                 try {
-                    const minutes = Math.floor(timestampSeconds / 60);
-                    const seconds = timestampSeconds % 60;
-                    const timeStr = `${minutes}:${String(seconds).padStart(2, '0')}`;
+                    const slackClient = await getSlackClientForVideo(videoId);
+                    if (slackClient) {
+                        const minutes = Math.floor(timestampSeconds / 60);
+                        const seconds = timestampSeconds % 60;
+                        const timeStr = `${minutes}:${String(seconds).padStart(2, '0')}`;
 
-                    const messagePayload = {
-                        channel: video.channel_id,
-                        thread_ts: video.message_ts,
-                        text: `📝 *[${timeStr}]* ${userName || 'Reviewer'}: "${commentText}"`,
-                    };
+                        const messagePayload = {
+                            channel: video.channel_id,
+                            thread_ts: video.message_ts,
+                            text: `📝 *[${timeStr}]* ${userName || 'Reviewer'}: "${commentText}"`,
+                        };
 
-                    // If there's an attachment (annotation screenshot), post it as an image block
-                    if (attachmentUrl && attachmentUrl.startsWith('data:image')) {
-                        // For base64 images, we note that there's an annotation
-                        // Slack doesn't accept base64 directly; we'd need file upload for production
-                        messagePayload.text += '\n📎 _[Annotation attached - view in web player]_';
-                    }
+                        // If there's an attachment (annotation screenshot), note it
+                        if (attachmentUrl && attachmentUrl.startsWith('data:image')) {
+                            messagePayload.text += '\n📎 _[Annotation attached - view in web player]_';
+                        }
 
-                    const slackResult = await slackClient.chat.postMessage(messagePayload);
+                        const slackResult = await slackClient.chat.postMessage(messagePayload);
 
-                    // Store the Slack message info for later reactions (e.g., resolved emoji)
-                    if (slackResult.ok && slackResult.ts) {
-                        await commentsService.updateSlackMessageInfo(
-                            comment.id,
-                            slackResult.ts,
-                            video.channel_id
-                        );
+                        // Store the Slack message info for later reactions
+                        if (slackResult.ok && slackResult.ts) {
+                            await commentsService.updateSlackMessageInfo(
+                                comment.id,
+                                slackResult.ts,
+                                video.channel_id
+                            );
+                        }
                     }
                 } catch (slackErr) {
                     console.error('Failed to post to Slack:', slackErr.message);
@@ -201,7 +236,7 @@ function createApiRouter(slackClient) {
     });
 
     // Resolve comment
-    router.patch('/comments/:id/resolve', async (req, res) => {
+    router.patch('/comments/:id/resolve', requireCommentAuth, async (req, res) => {
         try {
             const commentId = parseInt(req.params.id, 10);
 
@@ -215,13 +250,16 @@ function createApiRouter(slackClient) {
 
             if (success) {
                 // Add ✅ reaction to Slack message if we have the Slack info
-                if (slackClient && comment.slack_message_ts && comment.slack_channel_id) {
+                if (comment.slack_message_ts && comment.slack_channel_id) {
                     try {
-                        await slackClient.reactions.add({
-                            channel: comment.slack_channel_id,
-                            timestamp: comment.slack_message_ts,
-                            name: 'white_check_mark', // ✅ emoji
-                        });
+                        const slackClient = await getSlackClientForVideo(comment.video_id);
+                        if (slackClient) {
+                            await slackClient.reactions.add({
+                                channel: comment.slack_channel_id,
+                                timestamp: comment.slack_message_ts,
+                                name: 'white_check_mark',
+                            });
+                        }
                     } catch (slackErr) {
                         // Ignore if reaction already exists or other Slack errors
                         if (!slackErr.message?.includes('already_reacted')) {
@@ -240,7 +278,7 @@ function createApiRouter(slackClient) {
     });
 
     // Unresolve comment
-    router.patch('/comments/:id/unresolve', async (req, res) => {
+    router.patch('/comments/:id/unresolve', requireCommentAuth, async (req, res) => {
         try {
             const commentId = parseInt(req.params.id, 10);
 
@@ -254,13 +292,16 @@ function createApiRouter(slackClient) {
 
             if (success) {
                 // Remove ✅ reaction from Slack message if we have the Slack info
-                if (slackClient && comment.slack_message_ts && comment.slack_channel_id) {
+                if (comment.slack_message_ts && comment.slack_channel_id) {
                     try {
-                        await slackClient.reactions.remove({
-                            channel: comment.slack_channel_id,
-                            timestamp: comment.slack_message_ts,
-                            name: 'white_check_mark', // ✅ emoji
-                        });
+                        const slackClient = await getSlackClientForVideo(comment.video_id);
+                        if (slackClient) {
+                            await slackClient.reactions.remove({
+                                channel: comment.slack_channel_id,
+                                timestamp: comment.slack_message_ts,
+                                name: 'white_check_mark',
+                            });
+                        }
                     } catch (slackErr) {
                         // Ignore if reaction doesn't exist or other Slack errors
                         if (!slackErr.message?.includes('no_reaction')) {
@@ -279,7 +320,7 @@ function createApiRouter(slackClient) {
     });
 
     // Delete comment
-    router.delete('/comments/:id', async (req, res) => {
+    router.delete('/comments/:id', requireCommentAuth, async (req, res) => {
         try {
             const commentId = parseInt(req.params.id, 10);
             const success = await commentsService.deleteComment(commentId);

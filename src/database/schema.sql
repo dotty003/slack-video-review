@@ -31,3 +31,23 @@ CREATE TABLE IF NOT EXISTS comments (
 -- Index for faster comment lookups
 CREATE INDEX IF NOT EXISTS idx_comments_video_id ON comments(video_id);
 CREATE INDEX IF NOT EXISTS idx_videos_message ON videos(channel_id, message_ts);
+
+-- Installations table: stores per-workspace OAuth tokens
+CREATE TABLE IF NOT EXISTS installations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    team_id TEXT NOT NULL UNIQUE,
+    team_name TEXT,
+    bot_token TEXT NOT NULL,
+    bot_id TEXT,
+    bot_user_id TEXT,
+    app_id TEXT,
+    enterprise_id TEXT,
+    enterprise_name TEXT,
+    is_enterprise_install INTEGER DEFAULT 0,
+    installed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_installations_team ON installations(team_id);
+CREATE INDEX IF NOT EXISTS idx_installations_enterprise ON installations(enterprise_id);
+

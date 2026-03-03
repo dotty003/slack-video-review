@@ -4,6 +4,7 @@ import VideoPlayer from './components/VideoPlayer';
 import CommentSidebar from './components/CommentSidebar';
 import LoginScreen from './components/LoginScreen';
 import * as api from './api';
+import { getStreamUrl, hasValidToken } from './api';
 
 const App: React.FC = () => {
     // State
@@ -25,7 +26,7 @@ const App: React.FC = () => {
         return null;
     });
 
-    const [videoId, setVideoId] = useState<number | null>(() => {
+    const [videoId, _setVideoId] = useState<number | null>(() => {
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
             const id = params.get('video');
@@ -46,7 +47,7 @@ const App: React.FC = () => {
     const videoRef = useRef<HTMLVideoElement | null>(null);
 
     // Load video data
-    const loadVideoData = useCallback(async (preservePlayback = false) => {
+    const loadVideoData = useCallback(async (_preservePlayback = false) => {
         if (!videoId) {
             setError('No video specified. Use ?video=ID in URL.');
             setLoading(false);
@@ -130,6 +131,22 @@ const App: React.FC = () => {
         }
     };
 
+    // If no valid token, show auth error
+    if (!hasValidToken()) {
+        return (
+            <div className="flex items-center justify-center h-screen bg-wondr-bg text-gray-500 font-sans">
+                <div className="text-center max-w-md">
+                    <div className="text-5xl mb-4">🔒</div>
+                    <p className="text-lg font-medium text-gray-700">Authentication Required</p>
+                    <p className="text-sm text-gray-400 mt-2">
+                        This review link is invalid or has expired.<br />
+                        Please request a new review link from Slack.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
     // If no user is auto-detected, show manual login
     if (!currentUser) {
         return <LoginScreen onJoin={setCurrentUser} />;
@@ -204,7 +221,7 @@ const App: React.FC = () => {
                     {/* Player Area */}
                     <div className="flex-1 bg-black flex items-center justify-center relative overflow-hidden">
                         <VideoPlayer
-                            url={activeVideo.video_url}
+                            url={videoId ? getStreamUrl(videoId) : ''}
                             onTimeUpdate={handleTimeUpdate}
                             comments={comments}
                             videoRef={videoRef}

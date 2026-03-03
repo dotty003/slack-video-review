@@ -104,6 +104,31 @@ async function initPostgres() {
             CREATE INDEX IF NOT EXISTS idx_videos_message ON videos(channel_id, message_ts)
         `);
 
+        // Create installations table for multi-workspace OAuth
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS installations (
+                id SERIAL PRIMARY KEY,
+                team_id TEXT NOT NULL UNIQUE,
+                team_name TEXT,
+                bot_token TEXT NOT NULL,
+                bot_id TEXT,
+                bot_user_id TEXT,
+                app_id TEXT,
+                enterprise_id TEXT,
+                enterprise_name TEXT,
+                is_enterprise_install INTEGER DEFAULT 0,
+                installed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        await client.query(`
+            CREATE INDEX IF NOT EXISTS idx_installations_team ON installations(team_id)
+        `);
+        await client.query(`
+            CREATE INDEX IF NOT EXISTS idx_installations_enterprise ON installations(enterprise_id)
+        `);
+
         console.log('📦 PostgreSQL database initialized');
     } finally {
         client.release();
