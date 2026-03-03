@@ -146,21 +146,23 @@ app.event('app_mention', async ({ client, event, say }) => {
 });
 
 // Handle file shared events (for video uploads)
-app.event('file_shared', async ({ client, event }) => {
+app.event('file_shared', async ({ client, event, body }) => {
     try {
-        await handleFileShared({ client, event, baseUrl: BASE_URL });
+        const teamId = body?.team_id || event?.team || null;
+        await handleFileShared({ client, event, baseUrl: BASE_URL, teamId });
     } catch (err) {
         console.error('Error handling file_shared:', err);
     }
 });
 
 // Handle messages (for video URL detection)
-app.event('message', async ({ client, event }) => {
+app.event('message', async ({ client, event, body }) => {
     // Ignore message_changed, message_deleted, etc.
     if (event.subtype) return;
 
     try {
-        await handleMessage({ client, event });
+        const teamId = body?.team_id || event?.team || null;
+        await handleMessage({ client, event, teamId });
     } catch (err) {
         console.error('Error handling message:', err);
     }

@@ -96,6 +96,14 @@ async function initPostgres() {
             END $$;
         `);
 
+        // Add team_id column to videos if it doesn't exist (for multi-workspace token lookup)
+        await client.query(`
+            DO $$ BEGIN
+                ALTER TABLE videos ADD COLUMN IF NOT EXISTS team_id TEXT;
+            EXCEPTION WHEN duplicate_column THEN NULL;
+            END $$;
+        `);
+
         // Create indexes
         await client.query(`
             CREATE INDEX IF NOT EXISTS idx_comments_video_id ON comments(video_id)

@@ -3,9 +3,9 @@ const { generateReviewToken } = require('../middleware/auth');
 
 /**
  * Handle file_shared events to detect video uploads
- * @param {object} params - { client, event, baseUrl }
+ * @param {object} params - { client, event, baseUrl, teamId }
  */
-async function handleFileShared({ client, event, baseUrl }) {
+async function handleFileShared({ client, event, baseUrl, teamId }) {
     const { file_id, channel_id } = event;
 
     try {
@@ -35,6 +35,7 @@ async function handleFileShared({ client, event, baseUrl }) {
             videoUrl: file.url_private,
             videoName: file.name,
             videoType: 'upload',
+            teamId: teamId || null,
         });
 
         console.log(`🎬 Registered video upload: ${file.name}`);
@@ -103,9 +104,9 @@ async function handleFileShared({ client, event, baseUrl }) {
 
 /**
  * Handle message events to detect video URLs
- * @param {object} params - { client, event }
+ * @param {object} params - { client, event, teamId }
  */
-async function handleMessage({ client, event }) {
+async function handleMessage({ client, event, teamId }) {
     const { text, channel, ts, user, thread_ts } = event;
 
     // Skip bot messages and thread replies
@@ -128,6 +129,7 @@ async function handleMessage({ client, event }) {
         uploaderId: user,
         videoUrl: videoInfo.url,
         videoType: videoInfo.platform,
+        teamId: teamId || null,
     });
 
     console.log(`🎬 Registered ${videoInfo.platform} video: ${videoInfo.url}`);

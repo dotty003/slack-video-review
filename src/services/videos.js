@@ -59,23 +59,24 @@ async function registerVideo({
     videoUrl,
     videoName,
     videoType,
+    teamId,
 }) {
     // First try to update existing
     const existing = await getVideoByMessage(channelId, messageTs);
 
     if (existing) {
         const updateStmt = prepare(`
-      UPDATE videos SET video_url = ?, video_name = ?, video_type = ?
+      UPDATE videos SET video_url = ?, video_name = ?, video_type = ?, team_id = COALESCE(?, team_id)
       WHERE channel_id = ? AND message_ts = ?
     `);
-        await updateStmt.run(videoUrl || null, videoName || null, videoType, channelId, messageTs);
+        await updateStmt.run(videoUrl || null, videoName || null, videoType, teamId || null, channelId, messageTs);
         return await getVideoByMessage(channelId, messageTs);
     }
 
     // Insert new
     const stmt = prepare(`
-    INSERT INTO videos (channel_id, message_ts, thread_ts, uploader_id, video_url, video_name, video_type)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO videos (channel_id, message_ts, thread_ts, uploader_id, video_url, video_name, video_type, team_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
     await stmt.run(
@@ -85,7 +86,8 @@ async function registerVideo({
         uploaderId,
         videoUrl || null,
         videoName || null,
-        videoType
+        videoType,
+        teamId || null
     );
 
     return await getVideoByMessage(channelId, messageTs);

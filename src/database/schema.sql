@@ -8,9 +8,13 @@ CREATE TABLE IF NOT EXISTS videos (
     video_url TEXT,
     video_name TEXT,
     video_type TEXT,
+    team_id TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(channel_id, message_ts)
 );
+
+-- Migration: add team_id to existing videos table if column doesn't exist
+-- (PostgreSQL-safe: uses DO block or ignored via application code)
 
 -- Comments table: stores timestamp comments
 CREATE TABLE IF NOT EXISTS comments (

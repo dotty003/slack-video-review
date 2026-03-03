@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PinPoint — Video feedback, pinpointed.</title>
+    <meta name="description"
+        content="Frame-accurate video review with annotations — directly inside Slack. Upload a video, get precise feedback, resolve and ship faster.">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                <img src="icon.png" alt="PinPoint" class="logo-icon-img">
+                <span class="logo-text">PinPoint</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#faq">FAQ</a>
+            </div>
+            <a href="#cta" class="btn btn-primary btn-sm">Add to Slack</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg">
+            <div class="hero-gradient"></div>
+            <div class="hero-grid"></div>
+        </div>
+        <div class="container hero-content">
+            <div class="hero-badge animate-fade-up">
+                <span class="badge-dot"></span>
+                Now available on Slack App Directory
+            </div>
+            <h1 class="hero-title animate-fade-up delay-1">
+                Video feedback,<br><span class="gradient-text">pinpointed.</span>
+            </h1>
+            <p class="hero-subtitle animate-fade-up delay-2">
+                Frame-accurate video review with annotations — directly inside Slack.<br>
+                Upload a video. Get precise feedback. Resolve and ship.
+            </p>
+            <div class="hero-cta animate-fade-up delay-3">
+                <a href="#cta" class="btn btn-primary btn-lg">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" />
+                    </svg>
+                    Add to Slack — Free
+                </a>
+                <a href="#how-it-works" class="btn btn-ghost btn-lg">See how it works</a>
+            </div>
+            <p class="hero-meta animate-fade-up delay-4">Free forever for small teams · No credit card required ·
+                30-second setup</p>
+        </div>
+
+        <!-- Hero Visual -->
+        <div class="container animate-fade-up delay-4">
+            <div class="hero-visual">
+                <div class="browser-frame">
+                    <div class="browser-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <div class="browser-content">
+                        <div class="mock-player">
+                            <div class="mock-video">
+                                <div class="mock-play-btn">▶</div>
+                                <div class="mock-annotation" style="top: 30%; left: 60%;">
+                                    <div class="annotation-circle"></div>
+                                    <div class="annotation-label">Logo needs to be bigger</div>
+                                </div>
+                                <div class="mock-annotation" style="top: 65%; left: 25%;">
+                                    <div class="annotation-arrow">→</div>
+                                    <div class="annotation-label">Move CTA here</div>
+                                </div>
+                            </div>
+                            <div class="mock-timeline">
+                                <div class="timeline-bar">
+                                    <div class="timeline-progress"></div>
+                                    <div class="timeline-comment" style="left: 25%;" title="0:15">💬</div>
+                                    <div class="timeline-comment" style="left: 52%;" title="0:32">💬</div>
+                                    <div class="timeline-comment" style="left: 78%;" title="0:47">💬</div>
+                                </div>
+                            </div>
+                            <div class="mock-sidebar">
+                                <div class="mock-comment">
+                                    <div class="comment-avatar" style="background: #FF5BA3;">S</div>
+                                    <div class="comment-body">
+                                        <div class="comment-meta"><strong>Sarah</strong> <span>at 0:15</span></div>
+                                        <div class="comment-text">Logo needs to be bigger in the intro</div>
+                                    </div>
+                                    <div class="comment-resolved">✅</div>
+                                </div>
+                                <div class="mock-comment">
+                                    <div class="comment-avatar" style="background: #7C3AED;">M</div>
+                                    <div class="comment-body">
+                                        <div class="comment-meta"><strong>Marcus</strong> <span>at 0:32</span></div>
+                                        <div class="comment-text">Move the CTA to the left side</div>
+                                    </div>
+                                </div>
+                                <div class="mock-comment">
+                                    <div class="comment-avatar" style="background: #10B981;">J</div>
+                                    <div class="comment-body">
+                                        <div class="comment-meta"><strong>Jules</strong> <span>at 0:47</span></div>
+                                        <div class="comment-text">Great music choice! 🎵</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pain → Solution -->
+    <section class="pain-solution" id="problem">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">The Problem</span>
+                <h2>Video review is broken.</h2>
+                <p class="section-desc">Your team wastes hours chasing vague feedback across scattered channels.</p>
+            </div>
+            <div class="pain-grid">
+                <div class="pain-card">
+                    <div class="pain-icon">📧</div>
+                    <div class="pain-before">
+                        <span class="pain-label">Before</span>
+                        <p>"Can you fix the thing around the 2-minute mark?"</p>
+                    </div>
+                    <div class="pain-arrow">→</div>
+                    <div class="pain-after">
+                        <span class="pain-label after-label">With PinPoint</span>
+                        <p>Timestamped comment at 2:13 with a circle drawn around the exact element</p>
+                    </div>
+                </div>
+                <div class="pain-card">
+                    <div class="pain-icon">🔄</div>
+                    <div class="pain-before">
+                        <span class="pain-label">Before</span>
+                        <p>5-day review cycles with 3 rounds of clarifying questions</p>
+                    </div>
+                    <div class="pain-arrow">→</div>
+                    <div class="pain-after">
+                        <span class="pain-label after-label">With PinPoint</span>
+                        <p>One-click review from Slack. Feedback in minutes, not days</p>
+                    </div>
+                </div>
+                <div class="pain-card">
+                    <div class="pain-icon">💬</div>
+                    <div class="pain-before">
+                        <span class="pain-label">Before</span>
+                        <p>Feedback lost in DMs, emails, and Zoom calls</p>
+                    </div>
+                    <div class="pain-arrow">→</div>
+                    <div class="pain-after">
+                        <span class="pain-label after-label">With PinPoint</span>
+                        <p>Everything synced in one Slack thread with ✅ resolution tracking</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">How It Works</span>
+                <h2>Three steps. Thirty seconds.</h2>
+                <p class="section-desc">No onboarding. No account creation. No learning curve.</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <div class="step-visual">
+                        <div class="step-mock slack-mock">
+                            <div class="slack-message">
+                                <div class="slack-avatar">🎥</div>
+                                <div class="slack-body">
+                                    <strong>Sarah</strong> uploaded <span
+                                        class="slack-filename">Brand_Video_v3.mp4</span>
+                                </div>
+                            </div>
+                            <div class="slack-bot-message">
+                                <div class="slack-avatar bot"><img src="icon.png" alt="P"
+                                        style="width:100%;height:100%;border-radius:6px;"></div>
+                                <div class="slack-body">
+                                    <strong>PinPoint</strong>
+                                    <div class="slack-button">▶️ Review Video</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h3>Share a video in Slack</h3>
+                    <p>Upload an MP4, MOV, or paste a YouTube/Vimeo/Loom link. PinPoint detects it automatically.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <div class="step-visual">
+                        <div class="step-mock review-mock">
+                            <div class="review-video-area">
+                                <div class="review-play">▶</div>
+                                <div class="review-drawing">
+                                    <svg viewBox="0 0 200 120">
+                                        <circle cx="140" cy="40" r="25" fill="none" stroke="#FF5BA3" stroke-width="2" />
+                                        <line x1="50" y1="80" x2="100" y2="80" stroke="#FF5BA3" stroke-width="2"
+                                            marker-end="url(#arrowhead)" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="review-tools">
+                                <span class="tool active">✏️</span>
+                                <span class="tool">⬜</span>
+                                <span class="tool">⭕</span>
+                                <span class="tool">↗️</span>
+                            </div>
+                        </div>
+                    </div>
+                    <h3>Annotate & comment</h3>
+                    <p>Draw directly on the frame. Add timestamped comments. Circle the exact thing that needs to
+                        change.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <div class="step-visual">
+                        <div class="step-mock resolve-mock">
+                            <div class="resolve-comment">
+                                <span class="resolve-text">📝 [0:15] Sarah: Logo needs to be bigger</span>
+                                <span class="resolve-check">✅</span>
+                            </div>
+                            <div class="resolve-comment">
+                                <span class="resolve-text">📝 [0:32] Marcus: Move CTA to the left</span>
+                                <span class="resolve-check pending">○</span>
+                            </div>
+                            <div class="resolve-slack">
+                                <span>↕️ Synced to Slack thread</span>
+                            </div>
+                        </div>
+                    </div>
+                    <h3>Resolve & ship</h3>
+                    <p>Mark comments as resolved. ✅ reactions appear in Slack automatically. Everyone knows the status.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Features</span>
+                <h2>Everything you need.<br>Nothing you don't.</h2>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⏱️</div>
+                    <h3>Timestamped Comments</h3>
+                    <p>Every comment is pinned to the exact frame. "At 1:32" — no more guessing.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Visual Annotations</h3>
+                    <p>Draw circles, arrows, rectangles, and freehand — directly on the video frame.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Two-Way Slack Sync</h3>
+                    <p>Comments appear in Slack threads instantly. Reply from either place.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✅</div>
+                    <h3>Resolution Tracking</h3>
+                    <p>Mark feedback as resolved in the player. ✅ reactions appear in Slack automatically.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Secure Review Links</h3>
+                    <p>Cryptographically signed, time-limited links. No login required for reviewers.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3>YouTube, Vimeo & Loom</h3>
+                    <p>Works with Slack uploads and external video links. No re-uploading needed.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Zero Onboarding</h3>
+                    <p>Install in 30 seconds. No accounts, no training. Your team uses it immediately.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3>Slack Bot Commands</h3>
+                    <p>Add comments, check status, and resolve feedback — all without leaving Slack.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof -->
+    <section class="social-proof">
+        <div class="container">
+            <div class="proof-stats">
+                <div class="stat">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Slack Workspaces</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">2,500+</div>
+                    <div class="stat-label">Comments Left</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">30s</div>
+                    <div class="stat-label">Setup Time</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">4.9★</div>
+                    <div class="stat-label">User Rating</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Wall of Love</span>
+                <h2>Teams love PinPoint.</h2>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p>"We used to spend entire meetings explaining what needed to change. Now our editors just open
+                        PinPoint and see exactly what we mean — down to the frame."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar" style="background: #FF5BA3;">A</div>
+                        <div>
+                            <strong>Alex Chen</strong>
+                            <span>Creative Director, Bright Agency</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p>"The fact that it lives in Slack is everything. Our team tried Frame.io but nobody used it.
+                        PinPoint adoption was instant — because it's already where we work."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar" style="background: #7C3AED;">M</div>
+                        <div>
+                            <strong>Maya Rodriguez</strong>
+                            <span>Head of Content, ScaleUp Labs</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p>"Review cycles went from 5 days to same-day. The annotation feature alone saved us — clients
+                        circle exactly what they want changed instead of writing essays."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar" style="background: #10B981;">J</div>
+                        <div>
+                            <strong>James Park</strong>
+                            <span>Founder, Motion Studio Co</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison -->
+    <section class="comparison">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Why PinPoint</span>
+                <h2>Not another heavyweight tool.</h2>
+                <p class="section-desc">PinPoint is built for speed and simplicity — not feature bloat.</p>
+            </div>
+            <div class="comparison-table-wrapper">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th class="highlight-col">PinPoint</th>
+                            <th>Frame.io</th>
+                            <th>Vimeo Review</th>
+                            <th>Email / DMs</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Lives in Slack</td>
+                            <td class="highlight-col">✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td>Timestamped comments</td>
+                            <td class="highlight-col">✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td>Visual annotations</td>
+                            <td class="highlight-col">✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td>No login required</td>
+                            <td class="highlight-col">✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td>Setup time</td>
+                            <td class="highlight-col">30 sec</td>
+                            <td>30+ min</td>
+                            <td>15 min</td>
+                            <td>0</td>
+                        </tr>
+                        <tr>
+                            <td>Starting price</td>
+                            <td class="highlight-col"><strong>Free</strong></td>
+                            <td>$15/user/mo</td>
+                            <td>$7/user/mo</td>
+                            <td>Free</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Pricing</span>
+                <h2>Simple, transparent pricing.</h2>
+                <p class="section-desc">Per workspace, not per user. The whole team gets access.</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="pricing-tier">Free</div>
+                    <div class="pricing-price">$0</div>
+                    <div class="pricing-period">forever</div>
+                    <ul class="pricing-features">
+                        <li>3 active videos</li>
+                        <li>50 comments/month</li>
+                        <li>7-day review links</li>
+                        <li>Basic annotations</li>
+                        <li>Slack sync</li>
+                    </ul>
+                    <a href="#cta" class="btn btn-outline btn-block">Get Started</a>
+                </div>
+                <div class="pricing-card featured">
+                    <div class="pricing-popular">Most Popular</div>
+                    <div class="pricing-tier">Pro</div>
+                    <div class="pricing-price">$12</div>
+                    <div class="pricing-period">per workspace / month</div>
+                    <ul class="pricing-features">
+                        <li><strong>Unlimited</strong> videos</li>
+                        <li><strong>Unlimited</strong> comments</li>
+                        <li>30-day review links</li>
+                        <li>All annotation tools</li>
+                        <li>Priority Slack sync</li>
+                        <li>Email support</li>
+                    </ul>
+                    <a href="#cta" class="btn btn-primary btn-block">Start Free Trial</a>
+                </div>
+                <div class="pricing-card">
+                    <div class="pricing-tier">Team</div>
+                    <div class="pricing-price">$39</div>
+                    <div class="pricing-period">per workspace / month</div>
+                    <ul class="pricing-features">
+                        <li>Everything in Pro</li>
+                        <li>Custom branding</li>
+                        <li>Analytics dashboard</li>
+                        <li>90-day review links</li>
+                        <li>Priority support</li>
+                        <li>API access</li>
+                    </ul>
+                    <a href="#cta" class="btn btn-outline btn-block">Contact Sales</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">FAQ</span>
+                <h2>Questions? Answers.</h2>
+            </div>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        Do reviewers need a Slack account?
+                        <span class="faq-toggle">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>No. The review link opens in any browser. Anyone with the link can watch the video and leave
+                            comments — no Slack account or PinPoint account needed. However, comments do sync back to
+                            the Slack thread.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        Is my video data secure?
+                        <span class="faq-toggle">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Yes. Videos are never stored on our servers — they stream directly from Slack through an
+                            authenticated proxy. Review links are cryptographically signed (HMAC-SHA256) and expire
+                            automatically. All data is encrypted in transit and at rest.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        What video formats are supported?
+                        <span class="faq-toggle">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>PinPoint works with MP4, MOV, WebM, and any video format supported by Slack. It also works
+                            with YouTube, Vimeo, and Loom links shared in channels.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        How is this different from Frame.io?
+                        <span class="faq-toggle">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Frame.io is a full digital asset management platform with version control, storage, and
+                            integrations. PinPoint is laser-focused on fast feedback — it lives where your team already
+                            works (Slack), requires zero onboarding, and costs a fraction of the price. Use PinPoint for
+                            the back-and-forth review, Frame.io for final delivery.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        Can I use it with external clients?
+                        <span class="faq-toggle">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Absolutely. Share the review link with anyone — clients, freelancers, stakeholders. They open
+                            it in a browser, enter their name, and start reviewing. No sign-ups, no friction.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        How long does setup take?
+                        <span class="faq-toggle">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>30 seconds. Click "Add to Slack," authorize the app, and invite PinPoint to any channel.
+                            That's it. Upload a video and you'll see the review button instantly.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta" id="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Start reviewing in<br><span class="gradient-text">30 seconds.</span></h2>
+                <p>Free forever for small teams. No credit card required.</p>
+                <a href="https://slack-video-review.onrender.com/slack/install" class="btn btn-white btn-lg">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#1a1a2e">
+                        <path
+                            d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" />
+                    </svg>
+                    Add to Slack — Free
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <img src="icon.png" alt="PinPoint" class="logo-icon-img">
+                <span class="logo-text">PinPoint</span>
+                <p>Video feedback, pinpointed.</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <a href="#features">Features</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="#faq">FAQ</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <a href="/privacy">Privacy Policy</a>
+                    <a href="/terms">Terms of Service</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Connect</h4>
+                    <a href="#">LinkedIn</a>
+                    <a href="#">Twitter / X</a>
+                    <a href="#">Email Us</a>
+                </div>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <p>© 2026 PinPoint. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // FAQ toggle
+        function toggleFaq(button) {
+            const item = button.parentElement;
+            const isActive = item.classList.contains('active');
+            // Close all
+            document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+            // Open clicked (if not already active)
+            if (!isActive) item.classList.add('active');
+        }
+
+        // Intersection Observer for scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.pain-card, .step-card, .feature-card, .testimonial-card, .pricing-card, .stat').forEach(el => {
+            el.classList.add('scroll-animate');
+            observer.observe(el);
+        });
+    </script>
+</body>
+
+</html>

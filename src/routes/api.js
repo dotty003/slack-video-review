@@ -25,22 +25,26 @@ function createApiRouter(slackApp) {
         const video = await getVideoById(videoId);
         if (!video) return null;
 
-        // Try to get workspace-specific token
-        // We need team_id — look it up from the video's channel context
-        // For now, try the installations table; fall back to the app's default client
+        // If video has a team_id, get the workspace-specific token
+        if (video.team_id) {
+            try {
+                const token = await getBotTokenForTeam(video.team_id);
+                if (token) return new WebClient(token);
+            } catch (e) {
+                console.error('Error getting workspace token:', e.message);
+            }
+        }
+
+        // Fallback: try any available installation
         try {
-            const { WebClient } = require('@slack/web-api');
-            // Try to find the installation for this video's workspace
             const installations = require('../database/installationStore');
             const allInstalls = await installations.getAllInstallations();
-            // If we have installations, use the first matching one
-            // In a full implementation, videos would store team_id
             if (allInstalls.length > 0) {
                 const token = await installations.getBotTokenForTeam(allInstalls[0].team_id);
                 if (token) return new WebClient(token);
             }
         } catch (e) {
-            // WebClient not available or no installations — fall back
+            // No installations — fall back
         }
 
         // Fallback: use the Bolt app's default client (legacy mode)
@@ -90,15 +94,29 @@ function createApiRouter(slackApp) {
 
             // Get workspace-specific bot token for Slack file auth
             let botToken = config.slack.botToken; // Legacy fallback
-            try {
-                const installations = require('../database/installationStore');
-                const allInstalls = await installations.getAllInstallations();
-                if (allInstalls.length > 0) {
-                    const token = await installations.getBotTokenForTeam(allInstalls[0].team_id);
+
+            // Use the video's team_id to get the correct workspace token
+            if (video.team_id) {
+                try {
+                    const token = await getBotTokenForTeam(video.team_id);
                     if (token) botToken = token;
+                } catch (e) {
+                    console.error('Error getting team token for proxy:', e.message);
                 }
-            } catch (e) {
-                // Fall back to config token
+            }
+
+            // If still no token, try any available installation
+            if (!botToken) {
+                try {
+                    const installations = require('../database/installationStore');
+                    const allInstalls = await installations.getAllInstallations();
+                    if (allInstalls.length > 0) {
+                        const token = await installations.getBotTokenForTeam(allInstalls[0].team_id);
+                        if (token) botToken = token;
+                    }
+                } catch (e) {
+                    // Fall back to config token
+                }
             }
 
             if (!botToken) {
