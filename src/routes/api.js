@@ -88,6 +88,23 @@ function createApiRouter(slackApp) {
 
             const videoUrl = video.video_url;
 
+            // Get workspace-specific bot token for Slack file auth
+            let botToken = config.slack.botToken; // Legacy fallback
+            try {
+                const installations = require('../database/installationStore');
+                const allInstalls = await installations.getAllInstallations();
+                if (allInstalls.length > 0) {
+                    const token = await installations.getBotTokenForTeam(allInstalls[0].team_id);
+                    if (token) botToken = token;
+                }
+            } catch (e) {
+                // Fall back to config token
+            }
+
+            if (!botToken) {
+                return res.status(500).send('No bot token available for video streaming');
+            }
+
             // Parse the URL
             const parsedUrl = new URL(videoUrl);
             const isHttps = parsedUrl.protocol === 'https:';
@@ -100,7 +117,7 @@ function createApiRouter(slackApp) {
                 path: parsedUrl.pathname + parsedUrl.search,
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${config.slack.botToken}`,
+                    'Authorization': `Bearer ${botToken}`,
                 },
             };
 
@@ -118,7 +135,7 @@ function createApiRouter(slackApp) {
                         path: redirectUrl.pathname + redirectUrl.search,
                         method: 'GET',
                         headers: {
-                            'Authorization': `Bearer ${config.slack.botToken}`,
+                            'Authorization': `Bearer ${botToken}`,
                         },
                     };
 
