@@ -79,7 +79,7 @@ async function handleFileShared({ client, event, baseUrl, teamId }) {
                                     text: '🎬 Review Video',
                                     emoji: true,
                                 },
-                                url: reviewUrl,
+                                value: JSON.stringify({ videoId: video.id, token: generateReviewToken(video.id) }),
                                 action_id: 'review_video',
                                 style: 'primary',
                             },

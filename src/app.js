@@ -169,6 +169,96 @@ app.event('message', async ({ client, event, body }) => {
 });
 
 // ================================================
+// Slack Action Handlers
+// ================================================
+
+// Handle "Review Video" button clicks — look up user profile and redirect with identity
+app.action('review_video', async ({ ack, client, body }) => {
+    await ack();
+
+    try {
+        const userId = body.user.id;
+        const channelId = body.channel?.id;
+
+        // Parse video info from button value
+        let videoId, token;
+        try {
+            const parsed = JSON.parse(body.actions[0].value);
+            videoId = parsed.videoId;
+            token = parsed.token;
+        } catch (e) {
+            console.error('Failed to parse review_video value:', e);
+            return;
+        }
+
+        // Look up the user's Slack profile
+        let userName = body.user.name || 'Reviewer';
+        let avatarUrl = '';
+        try {
+            const userInfo = await client.users.info({ user: userId });
+            userName = userInfo.user.profile?.display_name
+                || userInfo.user.profile?.real_name
+                || userInfo.user.real_name
+                || userInfo.user.name
+                || 'Reviewer';
+            avatarUrl = userInfo.user.profile?.image_72
+                || userInfo.user.profile?.image_48
+                || '';
+        } catch (e) {
+            console.error('Could not fetch user profile:', e.message);
+        }
+
+        // Build personalized review URL
+        const reviewUrl = new URL(`${BASE_URL}/review`);
+        reviewUrl.searchParams.set('video', videoId);
+        reviewUrl.searchParams.set('token', token);
+        reviewUrl.searchParams.set('user_name', userName);
+        reviewUrl.searchParams.set('user_id', userId);
+        if (avatarUrl) {
+            reviewUrl.searchParams.set('avatar_url', avatarUrl);
+        }
+
+        const personalizedUrl = reviewUrl.toString();
+
+        // Send ephemeral message with the personalized link (only visible to the clicker)
+        if (channelId) {
+            await client.chat.postEphemeral({
+                channel: channelId,
+                user: userId,
+                text: `🎬 Opening review player as *${userName}*...`,
+                blocks: [
+                    {
+                        type: 'section',
+                        text: {
+                            type: 'mrkdwn',
+                            text: `🎬 *Your personalized review link is ready!*\nOpening as *${userName}*`,
+                        },
+                        accessory: {
+                            type: 'button',
+                            text: {
+                                type: 'plain_text',
+                                text: '🎬 Open Review Player',
+                                emoji: true,
+                            },
+                            url: personalizedUrl,
+                            action_id: 'open_review_link',
+                            style: 'primary',
+                        },
+                    },
+                ],
+            });
+        }
+    } catch (err) {
+        console.error('Error handling review_video action:', err);
+    }
+});
+
+// Acknowledge the open_review_link action (URL button, no-op)
+app.action('open_review_link', async ({ ack }) => {
+    await ack();
+});
+
+// ================================================
 // Start Server
 // ================================================
 (async () => {
