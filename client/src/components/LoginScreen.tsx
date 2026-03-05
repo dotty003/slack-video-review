@@ -14,16 +14,21 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onJoin }) => {
             onJoin({
                 id: `web-${Date.now()}`,
                 name: name.trim(),
-                avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(name.trim())}&background=FF5BA3&color=fff&bold=true`,
+                avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(name.trim())}&background=9100BD&color=fff&bold=true`,
             });
         }
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-wondr-lavender via-white to-wondr-bg flex items-center justify-center p-6">
-            <div className="bg-white rounded-wondr shadow-2xl p-8 w-full max-w-md">
+        <div className="min-h-screen bg-gradient-to-br from-purple-100 via-white to-gray-50 flex items-center justify-center p-6">
+            <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md">
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-wondr-pink mb-2">WONDR Review</h1>
+                    <div className="flex items-center justify-center gap-2 mb-3">
+                        <div className="w-10 h-10 bg-[#9100BD] rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-md shadow-[#9100BD]/20">
+                            P
+                        </div>
+                        <span className="font-bold text-2xl tracking-tight text-[#9100BD]">PinPoint</span>
+                    </div>
                     <p className="text-gray-500">Enter your name to start reviewing</p>
                 </div>
 
@@ -38,7 +43,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onJoin }) => {
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="e.g. Creative Director"
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-wondr-pink/50 focus:border-wondr-pink transition-all"
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#9100BD]/50 focus:border-[#9100BD] transition-all"
                             autoFocus
                         />
                     </div>
@@ -46,7 +51,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onJoin }) => {
                     <button
                         type="submit"
                         disabled={!name.trim()}
-                        className="w-full py-3 bg-wondr-pink text-white font-bold rounded-xl hover:bg-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-wondr-pink/20"
+                        className="w-full py-3 bg-[#9100BD] text-white font-bold rounded-xl hover:bg-[#7a00a0] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-[#9100BD]/20"
                     >
                         Join Review Session
                     </button>

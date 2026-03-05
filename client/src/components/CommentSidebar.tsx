@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Send, CheckCircle, Circle, Trash2, MessageSquare, Clock, Image as ImageIcon, X } from 'lucide-react';
+import { Send, Check, Trash2, MessageSquare, Clock, Paperclip, X } from 'lucide-react';
 import { Comment, User } from '../types';
 import { formatTime, formatRelativeTime } from '../utils/formatters';
 
@@ -54,7 +54,6 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            // Store the original filename
             setAttachmentFilename(file.name);
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -69,7 +68,7 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
         if (userId === currentUser.id) {
             return currentUser.avatarUrl;
         }
-        return `https://ui-avatars.com/api/?name=${encodeURIComponent(userId)}&background=6366f1&color=fff&bold=true`;
+        return `https://ui-avatars.com/api/?name=${encodeURIComponent(userId)}&background=9100BD&color=fff&bold=true`;
     };
 
     const activeCommentId = comments.reduce<number | null>((prev, curr) => {
@@ -80,26 +79,31 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
     }, null);
 
     return (
-        <div className="flex flex-col h-full bg-white border-l border-gray-200 w-full md:w-96 shadow-xl z-30">
-            {/* Header */}
-            <div className="p-5 border-b border-gray-100 flex flex-col gap-4 bg-white z-10">
-                <div className="flex justify-between items-center">
-                    <h2 className="text-gray-900 font-bold text-xl flex items-center gap-2">
-                        Comments <span className="text-wondr-pink text-base font-medium">({status.total})</span>
-                    </h2>
-                    <div className="text-xs text-gray-500">
-                        <span className="text-green-600">{status.resolved}</span> / {status.total} resolved
+        <div className="flex flex-col h-full bg-white border-l border-gray-200 w-full md:w-96 shadow-xl z-30 relative">
+            {/* Sidebar Header */}
+            <div className="p-5 border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                        <h2 className="font-semibold text-slate-800">Comments</h2>
+                        <span className="bg-gray-100 text-gray-600 text-xs font-medium px-2 py-0.5 rounded-full">{status.total}</span>
                     </div>
+                    {status.resolved > 0 && (
+                        <div className="flex items-center gap-1 text-xs text-green-600 font-medium bg-green-50 px-2 py-1 rounded-md border border-green-100">
+                            <Check className="w-3 h-3" />
+                            {status.resolved} Resolved
+                        </div>
+                    )}
                 </div>
 
-                <div className="flex p-1 bg-gray-100 rounded-full">
+                {/* Tabs */}
+                <div className="flex p-1 bg-gray-100 rounded-lg">
                     {(['all', 'open', 'resolved'] as const).map((f) => (
                         <button
                             key={f}
                             onClick={() => setFilter(f)}
-                            className={`flex-1 py-1.5 text-xs font-semibold rounded-full transition-all capitalize ${filter === f
-                                ? 'bg-white text-wondr-pink shadow-sm ring-1 ring-black/5'
-                                : 'text-gray-500 hover:text-gray-700'
+                            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all capitalize ${filter === f
+                                    ? 'bg-white text-slate-900 shadow-sm'
+                                    : 'text-slate-500 hover:text-slate-700'
                                 }`}
                         >
                             {f}
@@ -108,8 +112,8 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
                 </div>
             </div>
 
-            {/* List */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-wondr-bg/50">
+            {/* Comments List */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
                 {filteredComments.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-gray-400 space-y-3 opacity-60">
                         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
@@ -124,59 +128,69 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
                         return (
                             <div
                                 key={comment.id}
-                                className={`group relative flex flex-col p-4 rounded-wondr border transition-all duration-200 ${isActive
-                                    ? 'bg-white border-wondr-pink ring-2 ring-wondr-pink/20 shadow-md'
-                                    : 'bg-white border-gray-200 hover:border-wondr-lavender hover:shadow-sm'
-                                    } ${comment.resolved ? 'opacity-60 bg-gray-50' : ''}`}
+                                className={`group relative bg-white rounded-xl p-4 border transition-all duration-200 hover:shadow-md ${isActive
+                                        ? 'border-[#9100BD]/30 shadow-md ring-1 ring-[#9100BD]/10'
+                                        : 'border-gray-100 shadow-sm hover:border-gray-200'
+                                    } ${comment.resolved ? 'opacity-75 bg-gray-50' : ''}`}
                             >
-                                {/* Header Line */}
-                                <div className="flex justify-between items-start mb-2">
+                                {/* Active Indicator Bar */}
+                                {isActive && (
+                                    <div className="absolute left-0 top-3 bottom-3 w-1 bg-[#9100BD] rounded-r-full"></div>
+                                )}
+
+                                <div className="flex items-start justify-between mb-2 pl-1">
                                     <div className="flex items-center gap-2.5">
                                         <img
                                             src={getAvatarUrl(comment.user_id)}
                                             alt={comment.user_id}
-                                            className="w-8 h-8 rounded-full ring-2 ring-gray-100"
+                                            className="w-6 h-6 rounded-full object-cover"
                                         />
-                                        <div className="flex flex-col leading-tight">
-                                            <span className="text-sm font-bold text-gray-900">{comment.user_id}</span>
-                                            <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wide">
-                                                {formatRelativeTime(comment.created_at)}
-                                            </span>
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs font-bold text-slate-800">{comment.user_id}</span>
+                                                <span className="text-[10px] text-slate-400 font-normal">
+                                                    {formatRelativeTime(comment.created_at)}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={() => {
-                                            // Only show annotation overlay for annotation screenshots, not regular uploaded files
-                                            const isAnnotation = comment.attachment_filename?.startsWith('annotation-');
-                                            onSeek(comment.timestamp_seconds, isAnnotation ? comment.attachment_url : null);
-                                        }}
-                                        className="flex items-center gap-1 text-wondr-blue hover:text-wondr-pink text-xs font-bold bg-wondr-lavender/30 hover:bg-wondr-lavender/50 px-2 py-1 rounded-full cursor-pointer transition-colors"
-                                    >
-                                        <Clock className="w-3 h-3" />
-                                        {formatTime(comment.timestamp_seconds)}
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => {
+                                                const isAnnotation = comment.attachment_filename?.startsWith('annotation-');
+                                                onSeek(comment.timestamp_seconds, isAnnotation ? comment.attachment_url : null);
+                                            }}
+                                            className="flex items-center gap-1 text-[10px] font-mono font-medium text-[#9100BD] bg-[#9100BD]/5 px-1.5 py-0.5 rounded border border-[#9100BD]/10 cursor-pointer hover:bg-[#9100BD]/10 transition-colors"
+                                        >
+                                            <Clock className="w-3 h-3" />
+                                            {formatTime(comment.timestamp_seconds)}
+                                        </button>
+                                        {comment.resolved === 1 && (
+                                            <div className="text-green-500">
+                                                <Check className="w-4 h-4" />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Content */}
                                 {comment.comment_text && (
-                                    <p className={`text-sm mt-1 mb-3 leading-relaxed ${comment.resolved ? 'text-gray-400 line-through' : 'text-gray-700'}`}>
+                                    <p className={`text-sm leading-relaxed pl-1 ${comment.resolved ? 'line-through text-slate-400' : 'text-slate-700'}`}>
                                         {comment.comment_text}
                                     </p>
                                 )}
 
                                 {/* Attachment */}
                                 {comment.attachment_url && (
-                                    <div className="mb-3 rounded-lg overflow-hidden border border-gray-100 relative group/attachment">
+                                    <div className="mt-2 mb-1 rounded-lg overflow-hidden border border-gray-100 relative group/attachment">
                                         <img
                                             src={comment.attachment_url}
                                             alt="Attachment"
                                             className="w-full h-auto object-cover max-h-48"
                                         />
-                                        {/* Download button overlay */}
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                // Create a download link for the base64 image
                                                 const link = document.createElement('a');
                                                 link.href = comment.attachment_url!;
                                                 link.download = comment.attachment_filename || `attachment-${comment.id}.png`;
@@ -184,7 +198,7 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
                                                 link.click();
                                                 document.body.removeChild(link);
                                             }}
-                                            className="absolute bottom-2 right-2 px-3 py-1.5 bg-wondr-pink text-white text-xs font-bold rounded-full shadow-lg opacity-0 group-hover/attachment:opacity-100 hover:bg-pink-600 transition-all flex items-center gap-1"
+                                            className="absolute bottom-2 right-2 px-3 py-1.5 bg-[#9100BD] text-white text-xs font-bold rounded-full shadow-lg opacity-0 group-hover/attachment:opacity-100 hover:bg-[#7a00a0] transition-all flex items-center gap-1"
                                             title="Download attachment"
                                         >
                                             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
@@ -195,32 +209,21 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
                                     </div>
                                 )}
 
-                                {/* Actions */}
-                                <div className="flex items-center justify-end gap-2 mt-auto pt-2 border-t border-gray-100/50">
+                                {/* Actions - show on hover */}
+                                <div className="flex items-center justify-end mt-3 gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={() => onDeleteComment(comment.id)}
-                                        className="p-1.5 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+                                        className="p-1.5 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors"
                                         title="Delete comment"
                                     >
-                                        <Trash2 className="w-4 h-4" />
+                                        <Trash2 className="w-3.5 h-3.5" />
                                     </button>
-
                                     <button
                                         onClick={() => onResolveComment(comment.id)}
-                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${comment.resolved
-                                            ? 'bg-green-100 text-green-600 hover:bg-green-200'
-                                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                            }`}
+                                        className="text-xs text-slate-400 hover:text-[#9100BD] font-medium flex items-center gap-1 transition-colors"
                                     >
-                                        {comment.resolved ? (
-                                            <>
-                                                <CheckCircle className="w-3.5 h-3.5" /> Resolved
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Circle className="w-3.5 h-3.5" /> Mark Resolved
-                                            </>
-                                        )}
+                                        <Check className="w-3.5 h-3.5" />
+                                        {comment.resolved ? 'Unresolve' : 'Resolve'}
                                     </button>
                                 </div>
                             </div>
@@ -231,7 +234,7 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
             </div>
 
             {/* Input Area */}
-            <div className="p-5 bg-white border-t border-gray-200 shadow-[0_-5px_25px_-5px_rgba(0,0,0,0.05)]">
+            <div className="p-4 bg-white border-t border-gray-200 z-20">
                 {/* Attachment Preview */}
                 {attachment && (
                     <div className="mb-3 relative inline-block">
@@ -248,45 +251,49 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="relative">
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Leave Feedback</span>
-                        <span className="text-xs text-wondr-pink font-mono bg-wondr-lavender/20 px-2 py-0.5 rounded">@{formatTime(currentTime)}</span>
-                    </div>
-                    <div className="relative">
+                <form onSubmit={handleSubmit}>
+                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-2 focus-within:ring-2 focus-within:ring-[#9100BD]/20 focus-within:border-[#9100BD]/50 transition-all">
+                        <div className="flex items-center gap-2 mb-1 px-1">
+                            <span className="text-[10px] font-mono font-medium text-[#9100BD] bg-[#9100BD]/10 px-1.5 py-0.5 rounded">
+                                {formatTime(currentTime)}
+                            </span>
+                            <span className="text-xs text-gray-400">Commenting on current frame</span>
+                        </div>
                         <input
                             type="text"
                             value={newCommentText}
                             onChange={(e) => setNewCommentText(e.target.value)}
-                            placeholder="Type your thoughts..."
-                            className="w-full bg-gray-50 text-gray-900 rounded-xl pl-12 pr-14 py-3.5 focus:outline-none focus:ring-2 focus:ring-wondr-pink/50 placeholder-gray-400 border border-gray-200 transition-all"
+                            placeholder="Leave a comment..."
+                            className="w-full bg-transparent border-none focus:outline-none focus:ring-0 text-sm text-slate-800 placeholder:text-slate-400 p-1"
                         />
-
-                        {/* Image Upload Button */}
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            className="hidden"
-                            accept="image/*"
-                            onChange={handleImageUpload}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            className={`absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${attachment ? 'text-wondr-pink bg-wondr-pink/10' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
-                                }`}
-                            title="Attach image"
-                        >
-                            <ImageIcon className="w-5 h-5" />
-                        </button>
-
-                        <button
-                            type="submit"
-                            disabled={!newCommentText.trim() && !attachment}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-wondr-pink rounded-full flex items-center justify-center text-white hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100 transition-all shadow-sm"
-                        >
-                            <Send className="w-5 h-5 ml-0.5 mt-0.5" />
-                        </button>
+                        <div className="flex items-center justify-between mt-1 px-1">
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className={`p-1 rounded transition-colors ${attachment ? 'text-[#9100BD] bg-[#9100BD]/10' : 'text-slate-400 hover:text-slate-600 hover:bg-gray-200'
+                                        }`}
+                                    title="Attach image"
+                                >
+                                    <Paperclip className="w-4 h-4" />
+                                </button>
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={!newCommentText.trim() && !attachment}
+                                className="bg-[#9100BD] hover:bg-[#7a00a0] text-white p-2 rounded-lg transition-colors shadow-md shadow-[#9100BD]/20 flex items-center gap-2 text-xs font-semibold pr-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <Send className="w-3.5 h-3.5" />
+                                Send
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

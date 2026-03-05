@@ -14,7 +14,7 @@ interface VideoPlayerProps {
 }
 
 type AnnotationTool = 'pen' | 'rect' | 'circle' | 'arrow';
-type AnnotationColor = '#FF5BA3' | '#0000EE' | '#FFFFFF' | '#FACC15';
+type AnnotationColor = '#9100BD' | '#0000EE' | '#FFFFFF' | '#FACC15';
 
 interface Shape {
     tool: AnnotationTool;
@@ -35,7 +35,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
     // Annotation State
     const [isAnnotating, setIsAnnotating] = useState(false);
     const [currentTool, setCurrentTool] = useState<AnnotationTool>('pen');
-    const [currentColor, setCurrentColor] = useState<AnnotationColor>('#FF5BA3');
+    const [currentColor, setCurrentColor] = useState<AnnotationColor>('#9100BD');
     const [annotations, setAnnotations] = useState<Shape[]>([]);
     const [currentShape, setCurrentShape] = useState<Shape | null>(null);
 
@@ -439,23 +439,23 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
                 <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-4 shadow-xl z-30 animate-in slide-in-from-top-4 duration-300">
                     {/* Tools */}
                     <div className="flex items-center gap-1 border-r border-gray-300 pr-3">
-                        <button onClick={() => setCurrentTool('pen')} className={`p-2 rounded-full transition-colors ${currentTool === 'pen' ? 'bg-wondr-pink text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => setCurrentTool('pen')} className={`p-2 rounded-full transition-colors ${currentTool === 'pen' ? 'bg-[#9100BD] text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <PenTool className="w-5 h-5" />
                         </button>
-                        <button onClick={() => setCurrentTool('rect')} className={`p-2 rounded-full transition-colors ${currentTool === 'rect' ? 'bg-wondr-pink text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => setCurrentTool('rect')} className={`p-2 rounded-full transition-colors ${currentTool === 'rect' ? 'bg-[#9100BD] text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Square className="w-5 h-5" />
                         </button>
-                        <button onClick={() => setCurrentTool('circle')} className={`p-2 rounded-full transition-colors ${currentTool === 'circle' ? 'bg-wondr-pink text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => setCurrentTool('circle')} className={`p-2 rounded-full transition-colors ${currentTool === 'circle' ? 'bg-[#9100BD] text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Circle className="w-5 h-5" />
                         </button>
-                        <button onClick={() => setCurrentTool('arrow')} className={`p-2 rounded-full transition-colors ${currentTool === 'arrow' ? 'bg-wondr-pink text-white' : 'text-gray-600 hover:bg-gray-100'}`} title="Arrow">
+                        <button onClick={() => setCurrentTool('arrow')} className={`p-2 rounded-full transition-colors ${currentTool === 'arrow' ? 'bg-[#9100BD] text-white' : 'text-gray-600 hover:bg-gray-100'}`} title="Arrow">
                             <MoveUpRight className="w-5 h-5" />
                         </button>
                     </div>
 
                     {/* Colors */}
                     <div className="flex items-center gap-2 border-r border-gray-300 pr-3">
-                        {(['#FF5BA3', '#0000EE', '#FFFFFF', '#FACC15'] as AnnotationColor[]).map(c => (
+                        {(['#9100BD', '#0000EE', '#FFFFFF', '#FACC15'] as AnnotationColor[]).map(c => (
                             <button
                                 key={c}
                                 onClick={() => setCurrentColor(c)}
@@ -478,7 +478,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
                     {/* Add to Comment Button */}
                     <button
                         onClick={handleCaptureAndOpenModal}
-                        className="flex items-center gap-2 px-4 py-2 bg-wondr-blue text-white rounded-full font-bold text-sm hover:bg-blue-700 transition-colors shadow-sm"
+                        className="flex items-center gap-2 px-4 py-2 bg-[#9100BD] text-white rounded-full font-bold text-sm hover:bg-[#7a00a0] transition-colors shadow-sm"
                         title="Save Annotation to Comment"
                     >
                         <MessageSquarePlus className="w-4 h-4" />
@@ -508,7 +508,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
                                 value={commentText}
                                 onChange={(e) => setCommentText(e.target.value)}
                                 placeholder="Describe your feedback..."
-                                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-wondr-pink/50 focus:outline-none resize-none h-24 text-sm"
+                                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#9100BD]/50 focus:outline-none resize-none h-24 text-sm"
                                 autoFocus
                             />
                         </div>
@@ -522,7 +522,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
                             </button>
                             <button
                                 onClick={confirmSaveComment}
-                                className="px-5 py-2 bg-wondr-pink text-white font-bold text-sm rounded-full hover:bg-pink-600 transition-colors shadow-sm flex items-center gap-2"
+                                className="px-5 py-2 bg-[#9100BD] text-white font-bold text-sm rounded-full hover:bg-[#7a00a0] transition-colors shadow-sm flex items-center gap-2"
                             >
                                 <Check className="w-4 h-4" />
                                 Post Comment
@@ -534,21 +534,31 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
 
             {/* Overlay controls */}
             <div
-                className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-20 pb-6 px-8 transition-opacity duration-300 z-20 ${showControls && !showSaveModal ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col justify-end px-6 pb-6 transition-opacity duration-300 z-20 ${showControls && !showSaveModal ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
             >
                 {/* Timeline */}
-                <div className="relative w-full h-2 bg-gray-600/50 rounded-full mb-6 cursor-pointer group/timeline">
-                    {/* Comment Markers */}
-                    {comments.map((comment) => (
+                <div className="relative w-full mb-4 cursor-pointer group/timeline h-6 flex items-center">
+                    {/* Timeline Track */}
+                    <div className="w-full h-1.5 bg-white/20 rounded-full overflow-visible relative">
+                        {/* Comment Markers */}
+                        {comments.map((comment) => (
+                            <div
+                                key={comment.id}
+                                className={`absolute top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full z-20 hover:scale-[2] transition-transform ${comment.resolved ? 'bg-green-400' : 'bg-white/70 hover:bg-[#9100BD]'
+                                    }`}
+                                style={{ left: `${(comment.timestamp_seconds / duration) * 100}%` }}
+                                title={comment.comment_text}
+                            />
+                        ))}
+                        {/* Visual Progress */}
                         <div
-                            key={comment.id}
-                            className={`absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-white z-20 hover:scale-150 transition-transform shadow-sm ${comment.resolved ? 'bg-green-500' : 'bg-wondr-pink'
-                                }`}
-                            style={{ left: `${(comment.timestamp_seconds / duration) * 100}%` }}
-                            title={comment.comment_text}
-                        />
-                    ))}
+                            className="absolute top-0 left-0 h-full bg-[#9100BD] rounded-full pointer-events-none shadow-[0_0_10px_rgba(145,0,189,0.6)] relative"
+                            style={{ width: `${progress}%` }}
+                        >
+                            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-md scale-0 group-hover/timeline:scale-100 transition-transform"></div>
+                        </div>
+                    </div>
 
                     <input
                         type="range"
@@ -559,53 +569,52 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-30"
                         disabled={isAnnotating}
                     />
-                    {/* Visual Progress */}
-                    <div
-                        className="absolute top-0 left-0 h-full bg-wondr-pink rounded-full pointer-events-none shadow-[0_0_10px_rgba(255,91,163,0.5)]"
-                        style={{ width: `${progress}%` }}
-                    />
                 </div>
 
                 {/* Button Controls */}
                 <div className="flex items-center justify-between text-white">
-                    <div className="flex items-center gap-6">
-                        <button onClick={togglePlay} className="hover:text-wondr-pink transition-colors transform hover:scale-110 duration-200">
-                            {isPlaying ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current" />}
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={togglePlay}
+                            className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all border border-white/5"
+                        >
+                            {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
                         </button>
 
-                        <div className="flex items-center gap-2 text-sm font-bold font-mono tracking-wider text-gray-200">
+                        <div className="flex items-center gap-2 text-white/90 font-mono text-xs tracking-wider">
                             <span>{formatTime((progress / 100) * duration || 0)}</span>
-                            <span className="text-gray-500">/</span>
+                            <span className="text-white/40">/</span>
                             <span>{formatTime(duration)}</span>
                         </div>
+
+                        <div className="h-4 w-px bg-white/10 mx-2"></div>
+
+                        <button
+                            onClick={toggleAnnotationMode}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${isAnnotating
+                                ? 'bg-[#9100BD] text-white shadow-lg shadow-[#9100BD]/20'
+                                : 'bg-[#9100BD] hover:bg-[#7a00a0] text-white shadow-lg shadow-[#9100BD]/20'
+                                }`}
+                            title="Annotate Frame"
+                        >
+                            <MessageSquarePlus className="w-3.5 h-3.5" />
+                            Annotate
+                        </button>
                     </div>
 
                     <div className="flex items-center gap-4">
-                        {/* Annotation Toggle */}
-                        <button
-                            onClick={toggleAnnotationMode}
-                            className={`p-2 rounded-full transition-all duration-300 ${isAnnotating ? 'bg-wondr-pink text-white scale-110' : 'hover:bg-white/10 text-gray-300 hover:text-white'}`}
-                            title="Annotate Frame"
-                        >
-                            <PenTool className="w-5 h-5" />
+                        <button onClick={() => skip(-5)} className="text-white/70 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full" title="Rewind 5s">
+                            <SkipBack className="w-5 h-5" />
                         </button>
-
-                        <div className="w-px h-6 bg-gray-600/50 mx-2"></div>
-
-                        <button onClick={() => skip(-5)} className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-300 hover:text-white" title="Rewind 5s">
-                            <SkipBack className="w-6 h-6" />
+                        <button onClick={() => skip(5)} className="text-white/70 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full" title="Forward 5s">
+                            <SkipForward className="w-5 h-5" />
                         </button>
-                        <button onClick={() => skip(5)} className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-300 hover:text-white" title="Forward 5s">
-                            <SkipForward className="w-6 h-6" />
-                        </button>
-
-                        <div className="w-px h-6 bg-gray-600/50 mx-2"></div>
 
                         <div className="flex items-center gap-2 group/volume">
-                            <button onClick={toggleMute} className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-300 hover:text-white">
-                                {isMuted || volume === 0 ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+                            <button onClick={toggleMute} className="text-white/70 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full">
+                                {isMuted || volume === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                             </button>
-                            <div className="w-0 overflow-hidden group-hover/volume:w-24 transition-all duration-300">
+                            <div className="w-0 overflow-hidden group-hover/volume:w-20 transition-all duration-300">
                                 <input
                                     type="range"
                                     min="0"
@@ -613,13 +622,13 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
                                     step="0.05"
                                     value={isMuted ? 0 : volume}
                                     onChange={handleVolumeChange}
-                                    className="w-24 h-1 bg-gray-600 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:hover:bg-wondr-pink [&::-webkit-slider-thumb]:transition-colors"
+                                    className="w-16 h-1 bg-white/30 rounded-full appearance-none cursor-pointer ml-1 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer"
                                 />
                             </div>
                         </div>
 
-                        <button onClick={toggleFullscreen} className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-300 hover:text-white" title="Fullscreen">
-                            <Maximize className="w-6 h-6" />
+                        <button onClick={toggleFullscreen} className="text-white/70 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full" title="Fullscreen">
+                            <Maximize className="w-5 h-5" />
                         </button>
                     </div>
                 </div>
@@ -627,12 +636,14 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
 
             {/* Center Play Button (only when paused and controls showing and NOT annotating) */}
             {!isPlaying && showControls && !isAnnotating && !showSaveModal && (
-                <button
-                    onClick={togglePlay}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-wondr-pink/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-wondr-pink transition-all group-hover:scale-110 shadow-xl shadow-wondr-pink/20 z-10"
-                >
-                    <Play className="w-10 h-10 text-white ml-2 fill-current" />
-                </button>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                    <button
+                        onClick={togglePlay}
+                        className="w-16 h-16 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 shadow-xl hover:scale-110 transition-transform pointer-events-auto"
+                    >
+                        <Play className="w-6 h-6 text-white fill-white ml-1" />
+                    </button>
+                </div>
             )}
         </div>
     );
