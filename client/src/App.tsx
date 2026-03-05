@@ -199,9 +199,7 @@ const App: React.FC = () => {
             <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6 shrink-0 z-50 shadow-sm relative">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-[#9100BD] rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-md shadow-[#9100BD]/20">
-                            P
-                        </div>
+                        <img src="/icon.png" alt="PinPoint" className="w-8 h-8 rounded-lg shadow-md shadow-[#9100BD]/20" />
                         <span className="font-bold text-xl tracking-tight text-[#9100BD]">PinPoint</span>
                     </div>
                     <div className="h-6 w-px bg-gray-200 mx-2 hidden md:block"></div>
