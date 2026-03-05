@@ -391,7 +391,7 @@ function createApiRouter(slackApp) {
                 return res.status(404).json({ error: 'No comments to export' });
             }
 
-            // Helper: convert seconds to SMPTE timecode (HH:MM:SS:FF at 24fps)
+            // Helper: convert seconds to SMPTE timecode (HH:MM:SS:FF)
             const fps = parseInt(req.query.fps) || 24;
             function toTimecode(totalSeconds) {
                 const h = Math.floor(totalSeconds / 3600);
@@ -406,28 +406,31 @@ function createApiRouter(slackApp) {
                 return Math.round(seconds * fps);
             }
 
-            // Build proper XMEML v4 (Premiere Pro compatible)
+            // XML escape helper
+            function xmlEscape(str) {
+                if (!str) return '';
+                return str.replace(/[<>&"']/g, c =>
+                    ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[c]));
+            }
+
             const videoName = video.video_name || `PinPoint Review ${videoId}`;
-            const safeVideoName = videoName.replace(/[<>&"']/g, c =>
-                ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[c]));
+            const safeVideoName = xmlEscape(videoName);
 
             // Calculate sequence duration from the last comment + buffer
             const maxTimestamp = Math.max(...comments.map(c => c.timestamp_seconds || 0));
-            const durationFrames = toFrames(maxTimestamp + 30); // 30s buffer after last comment
+            const durationFrames = toFrames(maxTimestamp + 30);
 
-            // Build markers at sequence level (Premiere requires this)
+            // Build markers at sequence level using correct DB field names
             let markersXml = '';
             comments.forEach((comment) => {
                 const tc = toTimecode(comment.timestamp_seconds || 0);
                 const frame = toFrames(comment.timestamp_seconds || 0);
-                const author = (comment.author_name || 'Anonymous').replace(/[<>&"']/g, c =>
-                    ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[c]));
-                const body = (comment.body || '').replace(/[<>&"']/g, c =>
-                    ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[c]));
+                const author = xmlEscape(comment.user_id || 'Anonymous');
+                const text = xmlEscape(comment.comment_text || '');
 
                 markersXml += `
 		<marker>
-			<comment>${author}: ${body}</comment>
+			<comment>${author}: ${text}</comment>
 			<name>${author} @ ${tc}</name>
 			<in>${frame}</in>
 			<out>-1</out>
