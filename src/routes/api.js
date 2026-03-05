@@ -406,13 +406,18 @@ function createApiRouter(slackApp) {
                 return Math.round(seconds * fps);
             }
 
-            // Build Final Cut Pro XML (Premiere imports this natively)
+            // Build proper XMEML v4 (Premiere Pro compatible)
             const videoName = video.video_name || `PinPoint Review ${videoId}`;
             const safeVideoName = videoName.replace(/[<>&"']/g, c =>
                 ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[c]));
 
+            // Calculate sequence duration from the last comment + buffer
+            const maxTimestamp = Math.max(...comments.map(c => c.timestamp_seconds || 0));
+            const durationFrames = toFrames(maxTimestamp + 30); // 30s buffer after last comment
+
+            // Build markers at sequence level (Premiere requires this)
             let markersXml = '';
-            comments.forEach((comment, index) => {
+            comments.forEach((comment) => {
                 const tc = toTimecode(comment.timestamp_seconds || 0);
                 const frame = toFrames(comment.timestamp_seconds || 0);
                 const author = (comment.author_name || 'Anonymous').replace(/[<>&"']/g, c =>
@@ -421,42 +426,48 @@ function createApiRouter(slackApp) {
                     ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[c]));
 
                 markersXml += `
-                    <marker>
-                        <comment>${author}: ${body}</comment>
-                        <name>💬 ${author} @ ${tc}</name>
-                        <in>${frame}</in>
-                        <out>${frame + 1}</out>
-                    </marker>`;
+		<marker>
+			<comment>${author}: ${body}</comment>
+			<name>${author} @ ${tc}</name>
+			<in>${frame}</in>
+			<out>-1</out>
+		</marker>`;
             });
 
             const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE xmeml>
 <xmeml version="4">
-    <sequence>
-        <name>${safeVideoName} — PinPoint Comments</name>
-        <rate>
-            <timebase>${fps}</timebase>
-            <ntsc>FALSE</ntsc>
-        </rate>
-        <media>
-            <video>
-                <track>
-                    <clipitem id="PinPoint_Review">
-                        <name>${safeVideoName}</name>
-                        <rate>
-                            <timebase>${fps}</timebase>
-                            <ntsc>FALSE</ntsc>
-                        </rate>
-                        <start>0</start>
-                        <end>${toFrames(Math.max(...comments.map(c => (c.timestamp_seconds || 0) + 10)))}</end>
-                        <in>0</in>
-                        <out>${toFrames(Math.max(...comments.map(c => (c.timestamp_seconds || 0) + 10)))}</out>
-                        ${markersXml}
-                    </clipitem>
-                </track>
-            </video>
-        </media>
-    </sequence>
+	<sequence>
+		<name>${safeVideoName} - PinPoint Comments</name>
+		<duration>${durationFrames}</duration>
+		<rate>
+			<timebase>${fps}</timebase>
+			<ntsc>FALSE</ntsc>
+		</rate>
+		<timecode>
+			<rate>
+				<timebase>${fps}</timebase>
+				<ntsc>FALSE</ntsc>
+			</rate>
+			<string>00:00:00:00</string>
+			<frame>0</frame>
+			<displayformat>NDF</displayformat>
+		</timecode>${markersXml}
+		<media>
+			<video>
+				<format>
+					<samplecharacteristics>
+						<width>1920</width>
+						<height>1080</height>
+					</samplecharacteristics>
+				</format>
+				<track/>
+			</video>
+			<audio>
+				<track/>
+			</audio>
+		</media>
+	</sequence>
 </xmeml>`;
 
             const filename = `${videoName.replace(/[^a-zA-Z0-9]/g, '_')}_PinPoint_Markers.xml`;
