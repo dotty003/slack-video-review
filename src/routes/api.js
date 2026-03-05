@@ -421,6 +421,10 @@ function createApiRouter(slackApp) {
             const durationFrames = toFrames(maxTimestamp + 30);
 
             // Build markers at sequence level using correct DB field names
+            // Construct review URL base for linking to annotations
+            const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+            const token = req.query.token || '';
+
             let markersXml = '';
             comments.forEach((comment) => {
                 const tc = toTimecode(comment.timestamp_seconds || 0);
@@ -428,9 +432,20 @@ function createApiRouter(slackApp) {
                 const author = xmlEscape(comment.user_id || 'Anonymous');
                 const text = xmlEscape(comment.comment_text || '');
 
+                // Build the comment content
+                let commentContent = `${author}: ${text}`;
+
+                // If comment has an attachment (annotation or media file), add a link
+                if (comment.attachment_url || comment.attachment_filename) {
+                    const hasAnnotation = comment.attachment_filename && comment.attachment_filename.startsWith('annotation-');
+                    const label = hasAnnotation ? 'View annotation' : `View attachment: ${xmlEscape(comment.attachment_filename || 'file')}`;
+                    const reviewLink = `${baseUrl}/review?video=${videoId}&amp;token=${encodeURIComponent(token)}`;
+                    commentContent += ` | ${label}: ${reviewLink}`;
+                }
+
                 markersXml += `
 		<marker>
-			<comment>${author}: ${text}</comment>
+			<comment>${commentContent}</comment>
 			<name>${author} @ ${tc}</name>
 			<in>${frame}</in>
 			<out>-1</out>
