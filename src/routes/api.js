@@ -371,6 +371,106 @@ function createApiRouter(slackApp) {
         }
     });
 
+    // ================================================
+    // Premiere Pro Markers Export
+    // ================================================
+
+    // Export comments as Premiere Pro compatible markers XML
+    router.get('/video/:id/export/premiere', requireReviewAuth, async (req, res) => {
+        try {
+            const videoId = parseInt(req.params.id, 10);
+            const video = await getVideoById(videoId);
+
+            if (!video) {
+                return res.status(404).json({ error: 'Video not found' });
+            }
+
+            const comments = await commentsService.getComments(videoId);
+
+            if (!comments || comments.length === 0) {
+                return res.status(404).json({ error: 'No comments to export' });
+            }
+
+            // Helper: convert seconds to SMPTE timecode (HH:MM:SS:FF at 24fps)
+            const fps = parseInt(req.query.fps) || 24;
+            function toTimecode(totalSeconds) {
+                const h = Math.floor(totalSeconds / 3600);
+                const m = Math.floor((totalSeconds % 3600) / 60);
+                const s = Math.floor(totalSeconds % 60);
+                const f = Math.round((totalSeconds % 1) * fps);
+                return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}:${String(f).padStart(2, '0')}`;
+            }
+
+            // Helper: convert seconds to frame count
+            function toFrames(seconds) {
+                return Math.round(seconds * fps);
+            }
+
+            // Build Final Cut Pro XML (Premiere imports this natively)
+            const videoName = video.video_name || `PinPoint Review ${videoId}`;
+            const safeVideoName = videoName.replace(/[<>&"']/g, c =>
+                ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[c]));
+
+            let markersXml = '';
+            comments.forEach((comment, index) => {
+                const tc = toTimecode(comment.timestamp_seconds || 0);
+                const frame = toFrames(comment.timestamp_seconds || 0);
+                const author = (comment.author_name || 'Anonymous').replace(/[<>&"']/g, c =>
+                    ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[c]));
+                const body = (comment.body || '').replace(/[<>&"']/g, c =>
+                    ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[c]));
+
+                markersXml += `
+                    <marker>
+                        <comment>${author}: ${body}</comment>
+                        <name>💬 ${author} @ ${tc}</name>
+                        <in>${frame}</in>
+                        <out>${frame + 1}</out>
+                    </marker>`;
+            });
+
+            const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xmeml>
+<xmeml version="4">
+    <sequence>
+        <name>${safeVideoName} — PinPoint Comments</name>
+        <rate>
+            <timebase>${fps}</timebase>
+            <ntsc>FALSE</ntsc>
+        </rate>
+        <media>
+            <video>
+                <track>
+                    <clipitem id="PinPoint_Review">
+                        <name>${safeVideoName}</name>
+                        <rate>
+                            <timebase>${fps}</timebase>
+                            <ntsc>FALSE</ntsc>
+                        </rate>
+                        <start>0</start>
+                        <end>${toFrames(Math.max(...comments.map(c => (c.timestamp_seconds || 0) + 10)))}</end>
+                        <in>0</in>
+                        <out>${toFrames(Math.max(...comments.map(c => (c.timestamp_seconds || 0) + 10)))}</out>
+                        ${markersXml}
+                    </clipitem>
+                </track>
+            </video>
+        </media>
+    </sequence>
+</xmeml>`;
+
+            const filename = `${videoName.replace(/[^a-zA-Z0-9]/g, '_')}_PinPoint_Markers.xml`;
+            res.set({
+                'Content-Type': 'application/xml',
+                'Content-Disposition': `attachment; filename="${filename}"`,
+            });
+            res.send(xml);
+        } catch (err) {
+            console.error('Premiere export error:', err);
+            res.status(500).json({ error: 'Export failed' });
+        }
+    });
+
     return router;
 }
 
