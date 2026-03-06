@@ -16,6 +16,10 @@ const { getBotTokenForTeam } = require('../database/installationStore');
 function createApiRouter(slackApp) {
     const router = express.Router();
 
+    // Cache resolved Google Drive URLs to avoid re-resolving uuid on every Range request
+    // Key: Google Drive file ID, Value: { url, resolvedAt }
+    const resolvedUrlCache = new Map();
+
     /**
      * Resolve a Google Drive share URL to a direct download URL.
      * Makes a lightweight HEAD/GET to extract the uuid from the virus scan page,
@@ -228,12 +232,25 @@ function createApiRouter(slackApp) {
                 if (!fileIdMatch) {
                     return res.status(400).send('Invalid Google Drive URL');
                 }
+                const fileId = fileIdMatch[1];
+
                 try {
-                    // Resolve the direct download URL (lightweight — only fetches the ~2KB virus scan page)
-                    const directUrl = await resolveGoogleDriveUrl(fileIdMatch[1]);
-                    console.log(`🚀 Google Drive: redirecting client directly to Google CDN`);
-                    // Redirect browser to load video directly from Google (fast!)
-                    return res.redirect(directUrl);
+                    // Check cache first (avoids re-resolving uuid on every Range request)
+                    let directUrl;
+                    const cached = resolvedUrlCache.get(fileId);
+                    const cacheAge = cached ? Date.now() - cached.resolvedAt : Infinity;
+
+                    if (cached && cacheAge < 10 * 60 * 1000) { // Cache for 10 minutes
+                        directUrl = cached.url;
+                    } else {
+                        // Resolve once (only fetches ~2KB virus scan page)
+                        directUrl = await resolveGoogleDriveUrl(fileId);
+                        resolvedUrlCache.set(fileId, { url: directUrl, resolvedAt: Date.now() });
+                        console.log(`🔗 Google Drive: resolved and cached URL for ${fileId}`);
+                    }
+
+                    // Proxy from the resolved URL (handles Range requests for fast seeking)
+                    return proxyExternalVideo(directUrl, req, res);
                 } catch (err) {
                     console.error('Google Drive resolve error:', err.message);
                     return res.status(502).send('Could not access Google Drive video — make sure sharing is set to "Anyone with the link"');
