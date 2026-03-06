@@ -85,6 +85,11 @@ async function fetchInstallation(installQuery) {
         throw new Error(`No installation found for team ${teamId || enterpriseId}`);
     }
 
+    // Block deactivated workspaces
+    if (row.active === 0) {
+        throw new Error(`Workspace ${row.team_name || teamId} has been deactivated`);
+    }
+
     return {
         team: { id: row.team_id, name: row.team_name },
         enterprise: row.enterprise_id
@@ -132,10 +137,13 @@ async function getBotTokenForTeam(teamId) {
     if (!teamId) return null;
 
     const row = await prepare(
-        'SELECT bot_token FROM installations WHERE team_id = ?'
+        'SELECT bot_token, active FROM installations WHERE team_id = ?'
     ).get(teamId);
 
-    return row?.bot_token || null;
+    // Don't return token for deactivated workspaces
+    if (!row || row.active === 0) return null;
+
+    return row.bot_token || null;
 }
 
 /**
@@ -143,7 +151,19 @@ async function getBotTokenForTeam(teamId) {
  * @returns {object[]} Array of installation records
  */
 async function getAllInstallations() {
-    return await prepare('SELECT team_id, team_name, app_id, installed_at, updated_at FROM installations').all();
+    return await prepare('SELECT team_id, team_name, app_id, active, installed_at, updated_at FROM installations').all();
+}
+
+/**
+ * Toggle workspace active status.
+ * @param {string} teamId - Slack team/workspace ID
+ * @param {boolean} active - true to activate, false to deactivate
+ */
+async function setWorkspaceActive(teamId, active) {
+    await prepare(
+        'UPDATE installations SET active = ?, updated_at = CURRENT_TIMESTAMP WHERE team_id = ?'
+    ).run(active ? 1 : 0, teamId);
+    console.log(`📦 Workspace ${teamId} set to ${active ? 'ACTIVE' : 'INACTIVE'}`);
 }
 
 module.exports = {
@@ -152,4 +172,5 @@ module.exports = {
     deleteInstallation,
     getBotTokenForTeam,
     getAllInstallations,
+    setWorkspaceActive,
 };

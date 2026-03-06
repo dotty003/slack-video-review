@@ -500,6 +500,77 @@ function createApiRouter(slackApp) {
         }
     });
 
+    // ================================================
+    // Admin Workspace Management Endpoints
+    // ================================================
+
+    /**
+     * Admin auth middleware — checks X-Admin-Secret header
+     */
+    function requireAdmin(req, res, next) {
+        const secret = req.headers['x-admin-secret'];
+        if (!secret || secret !== config.admin.secret) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        next();
+    }
+
+    /**
+     * GET /api/admin/workspaces
+     * List all installed workspaces with their active status.
+     */
+    router.get('/admin/workspaces', requireAdmin, async (req, res) => {
+        try {
+            const installations = require('../database/installationStore');
+            const workspaces = await installations.getAllInstallations();
+            res.json({ workspaces });
+        } catch (err) {
+            console.error('Admin list workspaces error:', err);
+            res.status(500).json({ error: 'Failed to list workspaces' });
+        }
+    });
+
+    /**
+     * PATCH /api/admin/workspaces/:teamId
+     * Toggle workspace active status.
+     * Body: { active: true/false }
+     */
+    router.patch('/admin/workspaces/:teamId', requireAdmin, async (req, res) => {
+        try {
+            const { teamId } = req.params;
+            const { active } = req.body;
+
+            if (typeof active !== 'boolean') {
+                return res.status(400).json({ error: 'active must be a boolean' });
+            }
+
+            const installations = require('../database/installationStore');
+            await installations.setWorkspaceActive(teamId, active);
+
+            res.json({ success: true, teamId, active });
+        } catch (err) {
+            console.error('Admin toggle workspace error:', err);
+            res.status(500).json({ error: 'Failed to update workspace' });
+        }
+    });
+
+    /**
+     * DELETE /api/admin/workspaces/:teamId
+     * Permanently remove a workspace installation.
+     */
+    router.delete('/admin/workspaces/:teamId', requireAdmin, async (req, res) => {
+        try {
+            const { teamId } = req.params;
+            const installations = require('../database/installationStore');
+            await installations.deleteInstallation({ teamId });
+
+            res.json({ success: true, teamId, deleted: true });
+        } catch (err) {
+            console.error('Admin delete workspace error:', err);
+            res.status(500).json({ error: 'Failed to delete workspace' });
+        }
+    });
+
     return router;
 }
 

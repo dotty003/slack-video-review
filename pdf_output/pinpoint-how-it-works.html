@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PinPoint — How It Works</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --purple: #9100BD;
+            --purple-light: #B44DD9;
+            --purple-dark: #6E008F;
+            --purple-bg: #F8F0FC;
+            --dark: #1a1a2e;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: white;
+            color: var(--gray-800);
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .page {
+            width: 210mm;
+            height: 297mm;
+            padding: 0;
+            margin: 0 auto;
+            page-break-after: always;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page:last-child {
+            page-break-after: avoid;
+        }
+
+        /* ====== COVER PAGE ====== */
+        .cover {
+            background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple) 40%, var(--purple-light) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .cover::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -30%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .cover::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -20%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .cover-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cover-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 24px;
+            margin-bottom: 40px;
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.25));
+        }
+
+        .cover h1 {
+            font-size: 56px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            margin-bottom: 12px;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .cover .subtitle {
+            font-size: 22px;
+            font-weight: 300;
+            opacity: 0.9;
+            margin-bottom: 60px;
+            letter-spacing: 0.5px;
+        }
+
+        .cover .tagline {
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0.7;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .cover .url {
+            position: absolute;
+            bottom: 40px;
+            font-size: 13px;
+            opacity: 0.6;
+            letter-spacing: 1px;
+            z-index: 1;
+        }
+
+        /* ====== STEP PAGES ====== */
+        .step-page {
+            background: white;
+            padding: 40px 55px 50px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 16px;
+        }
+
+        .step-number {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--purple), var(--purple-light));
+            color: white;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 800;
+            flex-shrink: 0;
+            box-shadow: 0 4px 20px rgba(145, 0, 189, 0.3);
+        }
+
+        .step-title-group {
+            flex: 1;
+        }
+
+        .step-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--purple);
+            margin-bottom: 4px;
+        }
+
+        .step-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--gray-800);
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .step-description {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--gray-600);
+            margin-bottom: 14px;
+            max-width: 600px;
+        }
+
+        .screenshot-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gray-50);
+            border-radius: 16px;
+            border: 1px solid var(--gray-200);
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .screenshot-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--purple), var(--purple-light));
+        }
+
+        .screenshot-container img {
+            max-width: 100%;
+            max-height: 540px;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Small screenshot variant */
+        .screenshot-container.small-screenshot img {
+            max-height: 180px;
+        }
+
+        /* Wide screenshot (for narrow/banner images) */
+        .screenshot-container.wide {
+            padding: 40px 30px;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 25px;
+            right: 55px;
+            font-size: 11px;
+            color: var(--gray-400);
+            font-weight: 500;
+        }
+
+        .page-logo {
+            position: absolute;
+            bottom: 25px;
+            left: 55px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .page-logo img {
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+        }
+
+        .page-logo span {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--purple);
+        }
+
+        .highlight-box {
+            background: var(--purple-bg);
+            border-left: 4px solid var(--purple);
+            padding: 10px 16px;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 16px;
+        }
+
+        .highlight-box p {
+            font-size: 12px;
+            color: var(--purple-dark);
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        /* ====== TWO-STEP PAGE ====== */
+        .dual-step-page {
+            background: white;
+            padding: 50px 55px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .dual-step {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dual-step .step-header {
+            margin-bottom: 15px;
+        }
+
+        .dual-step .step-number {
+            width: 44px;
+            height: 44px;
+            font-size: 20px;
+            border-radius: 12px;
+        }
+
+        .dual-step .step-title {
+            font-size: 22px;
+        }
+
+        .dual-step .step-description {
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .dual-step .screenshot-container {
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* ====== CLOSING PAGE ====== */
+        .closing {
+            background: linear-gradient(135deg, var(--dark) 0%, #2d1b4e 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .closing::before {
+            content: '';
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(145, 0, 189, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .closing-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .closing-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(145, 0, 189, 0.4);
+        }
+
+        .closing h2 {
+            font-size: 40px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+
+        .closing .closing-sub {
+            font-size: 18px;
+            opacity: 0.7;
+            font-weight: 300;
+            margin-bottom: 50px;
+        }
+
+        .closing .cta {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--purple), var(--purple-light));
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            padding: 16px 48px;
+            border-radius: 50px;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            box-shadow: 0 8px 30px rgba(145, 0, 189, 0.4);
+        }
+
+        .closing .contact-info {
+            margin-top: 60px;
+            font-size: 13px;
+            opacity: 0.5;
+        }
+
+        @media print {
+            .page {
+                page-break-after: always;
+            }
+
+            .page:last-child {
+                page-break-after: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- PAGE 1: COVER -->
+    <div class="page cover">
+        <div class="cover-content">
+            <img src="icon.png" alt="PinPoint" class="cover-icon">
+            <h1>PinPoint</h1>
+            <p class="subtitle">Video Review, Right Inside Slack</p>
+            <p class="tagline">How It Works — Step by Step</p>
+        </div>
+        <p class="url">pinpointapp.dev</p>
+    </div>
+
+    <!-- PAGE 2: STEP 1 — Upload -->
+    <div class="page step-page">
+        <div class="step-header">
+            <div class="step-number">1</div>
+            <div class="step-title-group">
+                <div class="step-label">Step One</div>
+                <div class="step-title">Upload Your Video to Slack</div>
+            </div>
+        </div>
+        <p class="step-description">
+            Start by uploading any video file to a Slack channel where PinPoint is installed.
+            Simply drag and drop, or use the attachment menu and select <strong>"Upload from your computer"</strong>.
+            PinPoint supports all major video formats — MP4, MOV, WebM, and more.
+        </p>
+        <div class="highlight-box">
+            <p>💡 No need to leave Slack, switch tools, or share links. Your video stays where your team already works.
+            </p>
+        </div>
+        <div class="screenshot-container">
+            <img src="1.png" alt="Slack upload menu showing Upload from your computer option">
+        </div>
+        <div class="page-logo"><img src="icon.png" alt=""><span>PinPoint</span></div>
+        <div class="page-number">02</div>
+    </div>
+
+    <!-- PAGE 3: STEP 2 — Video appears -->
+    <div class="page step-page">
+        <div class="step-header">
+            <div class="step-number">2</div>
+            <div class="step-title-group">
+                <div class="step-label">Step Two</div>
+                <div class="step-title">PinPoint Detects Your Video</div>
+            </div>
+        </div>
+        <p class="step-description">
+            The moment you upload a video, PinPoint automatically detects it and processes it for review.
+            You'll see a reply from the PinPoint bot appear in the message thread within seconds — no commands,
+            no setup, no manual triggers needed.
+        </p>
+        <div class="highlight-box">
+            <p>⚡ PinPoint works instantly — zero configuration required after installation.</p>
+        </div>
+        <div class="screenshot-container">
+            <img src="2.png" alt="Video uploaded in Slack with PinPoint detection">
+        </div>
+        <div class="page-logo"><img src="icon.png" alt=""><span>PinPoint</span></div>
+        <div class="page-number">03</div>
+    </div>
+
+    <!-- PAGE 4: STEP 3 — Bot reply -->
+    <div class="page step-page">
+        <div class="step-header">
+            <div class="step-number">3</div>
+            <div class="step-title-group">
+                <div class="step-label">Step Three</div>
+                <div class="step-title">Review Video Button Appears</div>
+            </div>
+        </div>
+        <p class="step-description">
+            In the video's thread, PinPoint posts a message with a <strong>"Review Video"</strong> button.
+            Any team member in the channel can click it to open the dedicated web-based review player.
+            You can also add comments directly from Slack using the inline command syntax shown.
+        </p>
+        <div class="highlight-box">
+            <p>🎯 Two ways to review: click the button for the full player, or use Slack commands for quick feedback.
+            </p>
+        </div>
+        <div class="screenshot-container">
+            <img src="3.png" alt="PinPoint bot reply with Review Video button in Slack thread">
+        </div>
+        <div class="page-logo"><img src="icon.png" alt=""><span>PinPoint</span></div>
+        <div class="page-number">04</div>
+    </div>
+
+    <!-- PAGE 5: STEPS 4 — Personalized link -->
+    <div class="page step-page">
+        <div class="step-header">
+            <div class="step-number">4</div>
+            <div class="step-title-group">
+                <div class="step-label">Step Four</div>
+                <div class="step-title">Get Your Personalized Review Link</div>
+            </div>
+        </div>
+        <p class="step-description">
+            When you click "Review Video", PinPoint sends you a private ephemeral message with your
+            <strong>personalized review link</strong>. This link is unique to you — your name and avatar automatically
+            appear in the review player so the team knows who left each comment. No sign-up or login required.
+        </p>
+        <div class="highlight-box">
+            <p>🔒 Each reviewer gets a unique, authenticated link — no accounts, no passwords, no friction.</p>
+        </div>
+        <div class="screenshot-container wide">
+            <img src="4.png" alt="PinPoint personalized review link ephemeral message">
+        </div>
+        <div class="page-logo"><img src="icon.png" alt=""><span>PinPoint</span></div>
+        <div class="page-number">05</div>
+    </div>
+
+    <!-- PAGE 6: STEP 5 — Web player -->
+    <div class="page step-page">
+        <div class="step-header">
+            <div class="step-number">5</div>
+            <div class="step-title-group">
+                <div class="step-label">Step Five</div>
+                <div class="step-title">Review in the Web Player</div>
+            </div>
+        </div>
+        <p class="step-description">
+            The PinPoint Review Player opens in your browser with a professional, distraction-free interface.
+            Watch the video with full playback controls, leave <strong>timestamped comments</strong>, and
+            use the <strong>Annotate</strong> tool to draw directly on the video frame.
+        </p>
+        <div class="highlight-box">
+            <p>🎬 Scrub to any frame, leave a comment, and it's automatically linked to that exact moment in the video.
+            </p>
+        </div>
+        <div class="screenshot-container">
+            <img src="5.png" alt="PinPoint web review player with video and comment sidebar">
+        </div>
+        <div class="page-logo"><img src="icon.png" alt=""><span>PinPoint</span></div>
+        <div class="page-number">06</div>
+    </div>
+
+    <!-- PAGE 7: STEP 6 — Comments & annotations -->
+    <div class="page step-page">
+        <div class="step-header">
+            <div class="step-number">6</div>
+            <div class="step-title-group">
+                <div class="step-label">Step Six</div>
+                <div class="step-title">Add Comments & Annotations</div>
+            </div>
+        </div>
+        <p class="step-description">
+            Leave as many timestamped comments as you need. Attach <strong>reference images</strong>, draw
+            <strong>annotations</strong> directly on the video frame, and see all feedback organized in a clean sidebar.
+            Each comment includes the exact timestamp — click any comment to jump to that moment.
+        </p>
+        <div class="highlight-box">
+            <p>✏️ Pro tip: Use the Annotate button to draw circles, arrows, and highlights right on the video frame.</p>
+        </div>
+        <div class="screenshot-container">
+            <img src="6.png" alt="PinPoint review player with multiple comments and annotations">
+        </div>
+        <div class="page-logo"><img src="icon.png" alt=""><span>PinPoint</span></div>
+        <div class="page-number">07</div>
+    </div>
+
+    <!-- PAGE 8: STEP 7 — Sync back to Slack -->
+    <div class="page step-page">
+        <div class="step-header">
+            <div class="step-number">7</div>
+            <div class="step-title-group">
+                <div class="step-label">Step Seven</div>
+                <div class="step-title">Feedback Syncs Back to Slack</div>
+            </div>
+        </div>
+        <p class="step-description">
+            Every comment you leave in the web player is <strong>automatically posted back</strong> to the original
+            Slack thread. Team members who prefer Slack can see all feedback without ever opening the browser.
+            Timestamps, text, and annotation indicators are all included — keeping everyone in sync.
+        </p>
+        <div class="highlight-box">
+            <p>🔄 Full two-way sync: review in the browser, discuss in Slack — nothing gets lost.</p>
+        </div>
+        <div class="screenshot-container">
+            <img src="7.png" alt="PinPoint comments synced back to Slack thread with timestamps">
+        </div>
+        <div class="page-logo"><img src="icon.png" alt=""><span>PinPoint</span></div>
+        <div class="page-number">08</div>
+    </div>
+
+
+
+</body>
+
+</html>

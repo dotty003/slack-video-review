@@ -138,6 +138,14 @@ async function initPostgres() {
         `);
 
         console.log('📦 PostgreSQL database initialized');
+
+        // Migration: Add active column to installations (for workspace management)
+        await client.query(`
+            DO $$ BEGIN
+                ALTER TABLE installations ADD COLUMN IF NOT EXISTS active INTEGER DEFAULT 1;
+            EXCEPTION WHEN duplicate_column THEN NULL;
+            END $$;
+        `);
     } finally {
         client.release();
     }

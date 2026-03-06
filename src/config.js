@@ -22,4 +22,8 @@ module.exports = {
     // Token TTL in seconds (default: 7 days)
     tokenTTL: parseInt(process.env.REVIEW_TOKEN_TTL, 10) || 604800,
   },
+  admin: {
+    // Password for accessing the admin dashboard
+    secret: process.env.ADMIN_SECRET || 'changeme',
+  },
 };
