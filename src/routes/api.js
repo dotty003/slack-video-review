@@ -17,6 +17,92 @@ function createApiRouter(slackApp) {
     const router = express.Router();
 
     /**
+     * Proxy an external video URL (Google Drive, Dropbox, direct links).
+     * Handles redirects, cookies, and pipes video data to the client.
+     */
+    function proxyExternalVideo(sourceUrl, req, res, maxRedirects = 5) {
+        const parsedUrl = new URL(sourceUrl);
+        const isHttps = parsedUrl.protocol === 'https:';
+        const httpModule = isHttps ? https : http;
+
+        const headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        };
+
+        // Forward Range header for seek support
+        if (req.headers.range) {
+            headers['Range'] = req.headers.range;
+        }
+
+        const options = {
+            hostname: parsedUrl.hostname,
+            port: parsedUrl.port || (isHttps ? 443 : 80),
+            path: parsedUrl.pathname + parsedUrl.search,
+            method: 'GET',
+            headers,
+        };
+
+        const proxyReq = httpModule.request(options, (proxyRes) => {
+            // Follow redirects (Google Drive does several)
+            if (proxyRes.statusCode >= 300 && proxyRes.statusCode < 400 && proxyRes.headers.location) {
+                if (maxRedirects <= 0) {
+                    return res.status(502).send('Too many redirects');
+                }
+                // Carry forward any cookies from the redirect
+                const cookies = proxyRes.headers['set-cookie'];
+                return proxyExternalVideo(proxyRes.headers.location, req, res, maxRedirects - 1);
+            }
+
+            // Check if Google returned an HTML page (virus scan confirmation)
+            const contentType = proxyRes.headers['content-type'] || '';
+            if (contentType.includes('text/html')) {
+                // Collect the HTML to find the confirmation link
+                let html = '';
+                proxyRes.on('data', chunk => html += chunk);
+                proxyRes.on('end', () => {
+                    // Look for the download confirmation link
+                    const confirmMatch = html.match(/confirm=([a-zA-Z0-9_-]+)/);
+                    if (confirmMatch && sourceUrl.includes('drive.google.com')) {
+                        const confirmedUrl = sourceUrl + '&confirm=' + confirmMatch[1];
+                        return proxyExternalVideo(confirmedUrl, req, res, maxRedirects - 1);
+                    }
+                    // If no confirmation found, try with confirm=t
+                    if (sourceUrl.includes('drive.google.com') && !sourceUrl.includes('confirm=')) {
+                        return proxyExternalVideo(sourceUrl + '&confirm=t', req, res, maxRedirects - 1);
+                    }
+                    res.status(502).send('Could not access video from external source');
+                });
+                return;
+            }
+
+            // Set response headers
+            res.setHeader('Content-Type', contentType || 'video/mp4');
+            if (proxyRes.headers['content-length']) {
+                res.setHeader('Content-Length', proxyRes.headers['content-length']);
+            }
+            if (proxyRes.headers['content-range']) {
+                res.setHeader('Content-Range', proxyRes.headers['content-range']);
+            }
+            res.setHeader('Accept-Ranges', 'bytes');
+
+            // Use 206 for range requests
+            res.status(proxyRes.statusCode === 206 ? 206 : 200);
+
+            // Pipe video data
+            proxyRes.pipe(res);
+        });
+
+        proxyReq.on('error', (err) => {
+            console.error('External video proxy error:', err.message);
+            if (!res.headersSent) {
+                res.status(502).send('Error fetching external video');
+            }
+        });
+
+        proxyReq.end();
+    }
+
+    /**
      * Get a Slack WebClient for a specific video's workspace.
      * In OAuth mode, fetches the workspace token from the installations table.
      * In legacy mode, uses the default app client.
@@ -95,33 +181,36 @@ function createApiRouter(slackApp) {
             const videoType = video.video_type || 'upload';
 
             // ============================================
-            // External video sources — redirect (no proxy)
+            // External video sources — proxy through server
+            // Google Drive/Dropbox need server-side proxy because
+            // their redirects and cookies block <video> tag loading
             // ============================================
 
             if (videoType === 'google_drive') {
-                // Convert Google Drive share URL to direct download/stream URL
                 const fileIdMatch = videoUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                if (fileIdMatch) {
-                    const fileId = fileIdMatch[1];
-                    // Use Google's direct download link (works for public/shared files)
-                    const directUrl = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
-                    return res.redirect(directUrl);
+                if (!fileIdMatch) {
+                    return res.status(400).send('Invalid Google Drive URL');
                 }
-                // Fallback: redirect to original URL
-                return res.redirect(videoUrl);
+                const fileId = fileIdMatch[1];
+                const directUrl = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
+
+                return proxyExternalVideo(directUrl, req, res);
             }
 
             if (videoType === 'dropbox') {
-                // Convert Dropbox share URL to direct download
                 const directUrl = videoUrl.replace('www.dropbox.com', 'dl.dropboxusercontent.com')
                     .replace('?dl=0', '?dl=1')
                     .replace('&dl=0', '&dl=1');
-                return res.redirect(directUrl);
+                return proxyExternalVideo(directUrl, req, res);
             }
 
-            if (['youtube', 'vimeo', 'loom', 'direct'].includes(videoType)) {
-                // For embeddable platforms, redirect to original URL
-                return res.redirect(videoUrl);
+            if (videoType === 'direct') {
+                return proxyExternalVideo(videoUrl, req, res);
+            }
+
+            if (['youtube', 'vimeo', 'loom'].includes(videoType)) {
+                // These need embed iframes, not direct streaming — not supported yet
+                return res.status(400).send('YouTube/Vimeo/Loom videos require embed support (coming soon)');
             }
 
             // ============================================
