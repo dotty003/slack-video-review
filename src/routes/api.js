@@ -17,8 +17,71 @@ function createApiRouter(slackApp) {
     const router = express.Router();
 
     /**
-     * Proxy an external video URL (Google Drive, Dropbox, direct links).
-     * Handles redirects, cookies, and pipes video data to the client.
+     * Resolve a Google Drive share URL to a direct download URL.
+     * Makes a lightweight HEAD/GET to extract the uuid from the virus scan page,
+     * then returns the final direct URL. Does NOT download the video data.
+     */
+    function resolveGoogleDriveUrl(fileId) {
+        return new Promise((resolve, reject) => {
+            const initialUrl = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
+
+            function followUrl(url, redirectsLeft) {
+                if (redirectsLeft <= 0) return reject(new Error('Too many redirects'));
+
+                const parsedUrl = new URL(url);
+                const options = {
+                    hostname: parsedUrl.hostname,
+                    port: 443,
+                    path: parsedUrl.pathname + parsedUrl.search,
+                    method: 'GET',
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+                    },
+                };
+
+                const req = https.request(options, (res) => {
+                    // Follow redirects
+                    if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                        return followUrl(res.headers.location, redirectsLeft - 1);
+                    }
+
+                    const contentType = res.headers['content-type'] || '';
+
+                    // If we already got the video, this URL is the direct URL
+                    if (!contentType.includes('text/html')) {
+                        // Abort the download — we only wanted to confirm the URL works
+                        res.destroy();
+                        return resolve(url);
+                    }
+
+                    // HTML = virus scan page, parse it for uuid
+                    let html = '';
+                    res.on('data', chunk => html += chunk);
+                    res.on('end', () => {
+                        const uuidMatch = html.match(/name="uuid"\s+value="([^"]+)"/);
+                        const idMatch = html.match(/name="id"\s+value="([^"]+)"/);
+
+                        if (uuidMatch && idMatch) {
+                            const directUrl = `https://drive.usercontent.google.com/download?id=${idMatch[1]}&export=download&confirm=t&uuid=${uuidMatch[1]}`;
+                            console.log(`🔗 Google Drive: resolved direct URL for file ${idMatch[1]}`);
+                            return resolve(directUrl);
+                        }
+
+                        reject(new Error('Could not parse Google Drive virus scan page'));
+                    });
+                });
+
+                req.on('error', reject);
+                req.end();
+            }
+
+            followUrl(initialUrl, 5);
+        });
+    }
+
+    /**
+     * Proxy an external video URL (Dropbox, direct links).
+     * For Google Drive, use resolveGoogleDriveUrl + redirect instead.
      */
     function proxyExternalVideo(sourceUrl, req, res, maxRedirects = 5) {
         const parsedUrl = new URL(sourceUrl);
@@ -43,7 +106,7 @@ function createApiRouter(slackApp) {
         };
 
         const proxyReq = httpModule.request(options, (proxyRes) => {
-            // Follow redirects (Google Drive does several)
+            // Follow redirects
             if (proxyRes.statusCode >= 300 && proxyRes.statusCode < 400 && proxyRes.headers.location) {
                 if (maxRedirects <= 0) {
                     return res.status(502).send('Too many redirects');
@@ -51,40 +114,9 @@ function createApiRouter(slackApp) {
                 return proxyExternalVideo(proxyRes.headers.location, req, res, maxRedirects - 1);
             }
 
-            // Check if Google returned an HTML page (virus scan confirmation)
-            const contentType = proxyRes.headers['content-type'] || '';
-            if (contentType.includes('text/html')) {
-                // Collect the HTML to extract the real download URL
-                let html = '';
-                proxyRes.on('data', chunk => html += chunk);
-                proxyRes.on('end', () => {
-                    // Google's virus scan page has a form with hidden fields:
-                    // action="https://drive.usercontent.google.com/download"
-                    // fields: id, export, confirm, uuid
-                    const uuidMatch = html.match(/name="uuid"\s+value="([^"]+)"/);
-                    const idMatch = html.match(/name="id"\s+value="([^"]+)"/);
-
-                    if (uuidMatch && idMatch) {
-                        const realUrl = `https://drive.usercontent.google.com/download?id=${idMatch[1]}&export=download&confirm=t&uuid=${uuidMatch[1]}`;
-                        console.log(`🔗 Google Drive: bypassing virus scan for file ${idMatch[1]}`);
-                        return proxyExternalVideo(realUrl, req, res, maxRedirects - 1);
-                    }
-
-                    // Fallback: try finding any download link in the HTML
-                    const linkMatch = html.match(/href="(\/uc\?[^"]*confirm=[^"]+)"/);
-                    if (linkMatch) {
-                        const fallbackUrl = `https://drive.google.com${linkMatch[1].replace(/&amp;/g, '&')}`;
-                        return proxyExternalVideo(fallbackUrl, req, res, maxRedirects - 1);
-                    }
-
-                    console.error('Google Drive: could not parse virus scan page');
-                    res.status(502).send('Could not access video — make sure the Google Drive link is set to "Anyone with the link can view"');
-                });
-                return;
-            }
-
             // Set response headers
-            res.setHeader('Content-Type', contentType || 'video/mp4');
+            const contentType = proxyRes.headers['content-type'] || 'video/mp4';
+            res.setHeader('Content-Type', contentType);
             if (proxyRes.headers['content-length']) {
                 res.setHeader('Content-Length', proxyRes.headers['content-length']);
             }
@@ -93,10 +125,7 @@ function createApiRouter(slackApp) {
             }
             res.setHeader('Accept-Ranges', 'bytes');
 
-            // Use 206 for range requests
             res.status(proxyRes.statusCode === 206 ? 206 : 200);
-
-            // Pipe video data
             proxyRes.pipe(res);
         });
 
@@ -199,10 +228,16 @@ function createApiRouter(slackApp) {
                 if (!fileIdMatch) {
                     return res.status(400).send('Invalid Google Drive URL');
                 }
-                const fileId = fileIdMatch[1];
-                const directUrl = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
-
-                return proxyExternalVideo(directUrl, req, res);
+                try {
+                    // Resolve the direct download URL (lightweight — only fetches the ~2KB virus scan page)
+                    const directUrl = await resolveGoogleDriveUrl(fileIdMatch[1]);
+                    console.log(`🚀 Google Drive: redirecting client directly to Google CDN`);
+                    // Redirect browser to load video directly from Google (fast!)
+                    return res.redirect(directUrl);
+                } catch (err) {
+                    console.error('Google Drive resolve error:', err.message);
+                    return res.status(502).send('Could not access Google Drive video — make sure sharing is set to "Anyone with the link"');
+                }
             }
 
             if (videoType === 'dropbox') {
