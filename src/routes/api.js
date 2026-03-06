@@ -48,29 +48,37 @@ function createApiRouter(slackApp) {
                 if (maxRedirects <= 0) {
                     return res.status(502).send('Too many redirects');
                 }
-                // Carry forward any cookies from the redirect
-                const cookies = proxyRes.headers['set-cookie'];
                 return proxyExternalVideo(proxyRes.headers.location, req, res, maxRedirects - 1);
             }
 
             // Check if Google returned an HTML page (virus scan confirmation)
             const contentType = proxyRes.headers['content-type'] || '';
             if (contentType.includes('text/html')) {
-                // Collect the HTML to find the confirmation link
+                // Collect the HTML to extract the real download URL
                 let html = '';
                 proxyRes.on('data', chunk => html += chunk);
                 proxyRes.on('end', () => {
-                    // Look for the download confirmation link
-                    const confirmMatch = html.match(/confirm=([a-zA-Z0-9_-]+)/);
-                    if (confirmMatch && sourceUrl.includes('drive.google.com')) {
-                        const confirmedUrl = sourceUrl + '&confirm=' + confirmMatch[1];
-                        return proxyExternalVideo(confirmedUrl, req, res, maxRedirects - 1);
+                    // Google's virus scan page has a form with hidden fields:
+                    // action="https://drive.usercontent.google.com/download"
+                    // fields: id, export, confirm, uuid
+                    const uuidMatch = html.match(/name="uuid"\s+value="([^"]+)"/);
+                    const idMatch = html.match(/name="id"\s+value="([^"]+)"/);
+
+                    if (uuidMatch && idMatch) {
+                        const realUrl = `https://drive.usercontent.google.com/download?id=${idMatch[1]}&export=download&confirm=t&uuid=${uuidMatch[1]}`;
+                        console.log(`🔗 Google Drive: bypassing virus scan for file ${idMatch[1]}`);
+                        return proxyExternalVideo(realUrl, req, res, maxRedirects - 1);
                     }
-                    // If no confirmation found, try with confirm=t
-                    if (sourceUrl.includes('drive.google.com') && !sourceUrl.includes('confirm=')) {
-                        return proxyExternalVideo(sourceUrl + '&confirm=t', req, res, maxRedirects - 1);
+
+                    // Fallback: try finding any download link in the HTML
+                    const linkMatch = html.match(/href="(\/uc\?[^"]*confirm=[^"]+)"/);
+                    if (linkMatch) {
+                        const fallbackUrl = `https://drive.google.com${linkMatch[1].replace(/&amp;/g, '&')}`;
+                        return proxyExternalVideo(fallbackUrl, req, res, maxRedirects - 1);
                     }
-                    res.status(502).send('Could not access video from external source');
+
+                    console.error('Google Drive: could not parse virus scan page');
+                    res.status(502).send('Could not access video — make sure the Google Drive link is set to "Anyone with the link can view"');
                 });
                 return;
             }
