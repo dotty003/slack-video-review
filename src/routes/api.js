@@ -81,6 +81,7 @@ function createApiRouter(slackApp) {
     });
 
     // Proxy video stream from Slack (handles authentication)
+    // For external sources (Google Drive, Dropbox), redirect to direct URL
     router.get('/video/:id/stream', requireReviewAuth, async (req, res) => {
         try {
             const videoId = parseInt(req.params.id, 10);
@@ -91,8 +92,42 @@ function createApiRouter(slackApp) {
             }
 
             const videoUrl = video.video_url;
+            const videoType = video.video_type || 'upload';
 
-            // Get workspace-specific bot token for Slack file auth
+            // ============================================
+            // External video sources — redirect (no proxy)
+            // ============================================
+
+            if (videoType === 'google_drive') {
+                // Convert Google Drive share URL to direct download/stream URL
+                const fileIdMatch = videoUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                if (fileIdMatch) {
+                    const fileId = fileIdMatch[1];
+                    // Use Google's direct download link (works for public/shared files)
+                    const directUrl = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
+                    return res.redirect(directUrl);
+                }
+                // Fallback: redirect to original URL
+                return res.redirect(videoUrl);
+            }
+
+            if (videoType === 'dropbox') {
+                // Convert Dropbox share URL to direct download
+                const directUrl = videoUrl.replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+                    .replace('?dl=0', '?dl=1')
+                    .replace('&dl=0', '&dl=1');
+                return res.redirect(directUrl);
+            }
+
+            if (['youtube', 'vimeo', 'loom', 'direct'].includes(videoType)) {
+                // For embeddable platforms, redirect to original URL
+                return res.redirect(videoUrl);
+            }
+
+            // ============================================
+            // Slack uploads — proxy with auth token
+            // ============================================
+
             let botToken = config.slack.botToken; // Legacy fallback
 
             // Use the video's team_id to get the correct workspace token

@@ -167,7 +167,7 @@ app.event('message', async ({ client, event, body }) => {
 
     try {
         const teamId = body?.team_id || event?.team || null;
-        await handleMessage({ client, event, teamId });
+        await handleMessage({ client, event, baseUrl: BASE_URL, teamId });
     } catch (err) {
         console.error('Error handling message:', err);
     }

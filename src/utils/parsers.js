@@ -105,6 +105,10 @@ const VIDEO_URL_PATTERNS = [
         platform: 'dropbox',
         patterns: [/dropbox\.com\/.*\.(mp4|mov|avi|webm)/i],
     },
+    {
+        platform: 'direct',
+        patterns: [/https?:\/\/[^\s]+\.(mp4|mov|webm|avi|mkv)(\?[^\s]*)?$/i],
+    },
 ];
 
 /**

@@ -106,7 +106,7 @@ async function handleFileShared({ client, event, baseUrl, teamId }) {
  * Handle message events to detect video URLs
  * @param {object} params - { client, event, teamId }
  */
-async function handleMessage({ client, event, teamId }) {
+async function handleMessage({ client, event, baseUrl, teamId }) {
     const { text, channel, ts, user, thread_ts } = event;
 
     // Skip bot messages and thread replies
@@ -122,12 +122,13 @@ async function handleMessage({ client, event, teamId }) {
     }
 
     // Register the video
-    await registerVideo({
+    const video = await registerVideo({
         channelId: channel,
         messageTs: ts,
         threadTs: ts,
         uploaderId: user,
         videoUrl: videoInfo.url,
+        videoName: videoInfo.platform === 'google_drive' ? 'Google Drive Video' : `${videoInfo.platform} video`,
         videoType: videoInfo.platform,
         teamId: teamId || null,
     });
@@ -145,6 +146,51 @@ async function handleMessage({ client, event, teamId }) {
         if (reactionErr.data?.error !== 'already_reacted') {
             console.log('Could not add reaction:', reactionErr.message);
         }
+    }
+
+    // Post the Review Video button (same as file uploads)
+    if (video && baseUrl) {
+        const reviewUrl = `${baseUrl}/review?video=${video.id}&token=${generateReviewToken(video.id)}`;
+
+        await client.chat.postMessage({
+            channel: channel,
+            thread_ts: ts,
+            text: `🎬 Video ready for review!`,
+            blocks: [
+                {
+                    type: 'section',
+                    text: {
+                        type: 'mrkdwn',
+                        text: `🎬 *Video ready for review!*\n\nExternal video detected (${videoInfo.platform.replace('_', ' ')}). Click below to open the review player.`,
+                    },
+                },
+                {
+                    type: 'actions',
+                    elements: [
+                        {
+                            type: 'button',
+                            text: {
+                                type: 'plain_text',
+                                text: '🎬 Review Video',
+                                emoji: true,
+                            },
+                            value: JSON.stringify({ videoId: video.id, token: generateReviewToken(video.id) }),
+                            action_id: 'review_video',
+                            style: 'primary',
+                        },
+                    ],
+                },
+                {
+                    type: 'context',
+                    elements: [
+                        {
+                            type: 'mrkdwn',
+                            text: `📎 Source: ${videoInfo.platform.replace('_', ' ')} • Large files stream directly — no upload needed`,
+                        },
+                    ],
+                },
+            ],
+        });
     }
 }
 
