@@ -56,13 +56,13 @@ function App() {
     const [workspaceUsers, setWorkspaceUsers] = useState<User[]>([]);
 
     // Admin state
-    const [isAdminRoute, setIsAdminRoute] = useState(window.location.pathname.startsWith('/admin'));
+    const [isAdminRoute, setIsAdminRoute] = useState(window.location.pathname.startsWith('/videodash'));
     const [adminSecret, setAdminSecret] = useState<string | null>(localStorage.getItem('admin_secret'));
 
     // Listen for history changes if needed, but for simple app just checking on mount is usually okay
     useEffect(() => {
         const handleLocationChange = () => {
-            setIsAdminRoute(window.location.pathname.startsWith('/admin'));
+            setIsAdminRoute(window.location.pathname.startsWith('/videodash'));
         };
         window.addEventListener('popstate', handleLocationChange);
         return () => window.removeEventListener('popstate', handleLocationChange);

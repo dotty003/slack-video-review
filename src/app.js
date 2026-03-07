@@ -128,8 +128,13 @@ expressApp.get('/health', (req, res) => {
     res.json({ status: 'ok', mode: isOAuthMode ? 'oauth' : 'legacy' });
 });
 
-// Admin dashboard (React SPA)
-expressApp.get('/admin*', (req, res) => {
+// Admin dashboard (Legacy Workspace Management)
+expressApp.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'pages/admin.html'));
+});
+
+// Video dashboard (React SPA)
+expressApp.get('/videodash*', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
