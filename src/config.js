@@ -17,8 +17,10 @@ module.exports = {
     path: process.env.DATABASE_PATH || './data/reviews.db',
   },
   auth: {
-    // Secret for HMAC-signing review tokens
-    tokenSecret: process.env.REVIEW_TOKEN_SECRET || crypto.randomBytes(32).toString('hex'),
+    // Secret for HMAC-signing review tokens.
+    // If REVIEW_TOKEN_SECRET is not set, we derive a stable fallback from the Slack signing secret
+    // to prevent all review links from becoming invalid every time the server restarts on Render.
+    tokenSecret: process.env.REVIEW_TOKEN_SECRET || crypto.createHash('sha256').update(process.env.SLACK_SIGNING_SECRET || crypto.randomBytes(32).toString('hex')).digest('hex'),
     // Token TTL in seconds (default: 7 days)
     tokenTTL: parseInt(process.env.REVIEW_TOKEN_TTL, 10) || 604800,
   },

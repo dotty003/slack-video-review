@@ -6,7 +6,7 @@ const { WebClient } = require('@slack/web-api');
 const commentsService = require('../services/comments');
 const { getVideoById, updateVideoStatus, getAllVideosWithStats, getVideosByTeamWithStats } = require('../services/videos');
 const config = require('../config');
-const { requireReviewAuth, requireCommentAuth } = require('../middleware/auth');
+const { requireReviewAuth, requireCommentAuth, generateReviewToken } = require('../middleware/auth');
 const { getBotTokenForTeam } = require('../database/installationStore');
 
 /**
@@ -823,11 +823,17 @@ function createApiRouter(slackApp) {
             // Fetch all videos for this workspace with their stats
             const videos = await getVideosByTeamWithStats(targetVideo.team_id);
 
+            // Generate a valid review token for each video so the frontend can securely link to them
+            const videosWithTokens = videos.map(v => ({
+                ...v,
+                token: generateReviewToken(v.id)
+            }));
+
             // Fetch the exact team name from the installations database
             const installations = require('../database/installationStore');
             const teamName = await installations.getTeamName(targetVideo.team_id) || targetVideo.team_id;
 
-            res.json({ videos, teamName });
+            res.json({ videos: videosWithTokens, teamName });
         } catch (err) {
             console.error('Workspace list videos error:', err);
             res.status(500).json({ error: 'Failed to list workspace videos' });
