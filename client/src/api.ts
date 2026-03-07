@@ -121,6 +121,17 @@ export async function fetchWorkspaceUsers(videoId: number): Promise<{ users: Use
 }
 
 /**
+ * Fetch all videos for the current workspace
+ */
+export async function fetchWorkspaceVideos(videoId: number): Promise<{ videos: AdminVideo[] }> {
+    const response = await fetch(`${API_BASE}/video/${videoId}/workspace-videos?token=${encodeURIComponent(REVIEW_TOKEN)}`);
+    if (!response.ok) {
+        throw new Error('Failed to fetch workspace videos');
+    }
+    return response.json();
+}
+
+/**
  * Validates admin secret and fetches admin dashboard data
  */
 export async function fetchAdminVideos(secret: string): Promise<{ videos: AdminVideo[] }> {

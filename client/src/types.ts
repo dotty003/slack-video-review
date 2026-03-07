@@ -29,6 +29,7 @@ export interface Video {
     video_type?: string;
     status?: 'pending' | 'approved' | 'rejected';
     created_at: string;
+    team_id?: string;
 }
 
 export interface AdminVideo extends Video {

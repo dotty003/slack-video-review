@@ -5,9 +5,10 @@ import CommentSidebar from './components/CommentSidebar';
 import LoginScreen from './components/LoginScreen';
 import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
+import WorkspaceDashboard from './components/WorkspaceDashboard';
 import * as api from './api';
 import { getStreamUrl, hasValidToken } from './api';
-import { Share } from 'lucide-react';
+import { Share, LayoutDashboard } from 'lucide-react';
 
 const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
@@ -58,6 +59,9 @@ function App() {
     // Admin state
     const [isAdminRoute, setIsAdminRoute] = useState(window.location.pathname.startsWith('/videodash'));
     const [adminSecret, setAdminSecret] = useState<string | null>(localStorage.getItem('admin_secret'));
+
+    // Workspace Dashboard state
+    const [showWorkspaceDashboard, setShowWorkspaceDashboard] = useState(false);
 
     // Listen for history changes if needed, but for simple app just checking on mount is usually okay
     useEffect(() => {
@@ -279,6 +283,18 @@ function App() {
                 </div>
 
                 <div className="flex items-center gap-2 md:gap-4">
+                    {/* Workspace Dashboard Toggle */}
+                    <button
+                        onClick={() => setShowWorkspaceDashboard(true)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-full transition-colors border border-slate-200"
+                        title="View all videos in this workspace"
+                    >
+                        <LayoutDashboard className="w-3.5 h-3.5" />
+                        <span className="hidden md:inline">Workspace Videos</span>
+                    </button>
+
+                    <div className="h-4 w-px bg-gray-200 mx-1 hidden md:block"></div>
+
                     {/* Approve/Reject Buttons */}
                     {activeVideo.status !== 'approved' && (
                         <button
@@ -357,6 +373,18 @@ function App() {
                     </div>
                 </div>
             </main>
+
+            {/* Workspace Dashboard Overlay */}
+            {showWorkspaceDashboard && activeVideo && (
+                <WorkspaceDashboard
+                    videoId={activeVideo.id}
+                    teamName={activeVideo.team_id || 'Workspace'}
+                    onClose={() => setShowWorkspaceDashboard(false)}
+                    onSelectVideo={(id) => {
+                        window.location.href = `/review?video=${id}&token=${new URLSearchParams(window.location.search).get('token')}`;
+                    }}
+                />
+            )}
         </div>
     );
 };
