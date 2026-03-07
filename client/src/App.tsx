@@ -76,11 +76,9 @@ const App: React.FC = () => {
     // Fetch workspace users once video data is loaded
     useEffect(() => {
         const fetchUsers = async () => {
-            if (activeVideo?.channel_id) {
+            if (activeVideo?.channel_id && videoId) {
                 try {
-                    // Using a dummy teamId since we aren't exposing it on the Video model yet
-                    // In a real app we'd pass the team_id. For now we use "default" to rely on bot token
-                    const { users } = await api.fetchWorkspaceUsers('default');
+                    const { users } = await api.fetchWorkspaceUsers(videoId);
                     setWorkspaceUsers(users);
                 } catch (err) {
                     console.error('Failed to fetch workspace users:', err);
@@ -88,7 +86,7 @@ const App: React.FC = () => {
             }
         };
         fetchUsers();
-    }, [activeVideo?.channel_id]);
+    }, [activeVideo?.channel_id, videoId]);
 
     // Video & Comment Interaction Handlers
     const handleTimeUpdate = (time: number) => {

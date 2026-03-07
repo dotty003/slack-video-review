@@ -367,25 +367,15 @@ function createApiRouter(slackApp) {
     });
 
     // Fetch workspace users for @mentions
-    router.get('/workspaces/:teamId/users', requireReviewAuth, async (req, res) => {
+    router.get('/video/:id/users', requireReviewAuth, async (req, res) => {
         try {
-            const teamId = req.params.teamId;
-            let botToken = config.slack.botToken;
+            const videoId = parseInt(req.params.id, 10);
 
-            if (teamId) {
-                try {
-                    const token = await getBotTokenForTeam(teamId);
-                    if (token) botToken = token;
-                } catch (e) {
-                    console.error('Error getting team token for users list:', e.message);
-                }
+            const slackClient = await getSlackClientForVideo(videoId);
+            if (!slackClient) {
+                return res.status(500).json({ error: 'No bot token available for this video' });
             }
 
-            if (!botToken) {
-                return res.status(500).json({ error: 'No bot token available' });
-            }
-
-            const slackClient = new WebClient(botToken);
             const result = await slackClient.users.list();
 
             if (!result.ok) {
