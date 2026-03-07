@@ -573,7 +573,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
 
                 {/* Button Controls */}
                 <div className="flex items-center justify-between text-white">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 sm:gap-4">
                         <button
                             onClick={togglePlay}
                             className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all border border-white/5"
@@ -591,18 +591,18 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
 
                         <button
                             onClick={toggleAnnotationMode}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${isAnnotating
+                            className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${isAnnotating
                                 ? 'bg-[#9100BD] text-white shadow-lg shadow-[#9100BD]/20'
                                 : 'bg-[#9100BD] hover:bg-[#7a00a0] text-white shadow-lg shadow-[#9100BD]/20'
                                 }`}
                             title="Annotate Frame"
                         >
                             <MessageSquarePlus className="w-3.5 h-3.5" />
-                            Annotate
+                            <span className="hidden sm:inline">Annotate</span>
                         </button>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 sm:gap-4">
                         <button onClick={() => skip(-5)} className="text-white/70 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full" title="Rewind 5s">
                             <SkipBack className="w-5 h-5" />
                         </button>
@@ -610,7 +610,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
                             <SkipForward className="w-5 h-5" />
                         </button>
 
-                        <div className="flex items-center gap-2 group/volume">
+                        <div className="hidden sm:flex items-center gap-2 group/volume">
                             <button onClick={toggleMute} className="text-white/70 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full">
                                 {isMuted || volume === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                             </button>
@@ -627,7 +627,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, onTimeUpdate, comments, 
                             </div>
                         </div>
 
-                        <button onClick={toggleFullscreen} className="text-white/70 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full" title="Fullscreen">
+                        <button onClick={toggleFullscreen} className="hidden sm:block text-white/70 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full" title="Fullscreen">
                             <Maximize className="w-5 h-5" />
                         </button>
                     </div>

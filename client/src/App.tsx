@@ -266,8 +266,8 @@ function App() {
     return (
         <div className="flex flex-col h-screen bg-gray-50 text-slate-900 overflow-hidden font-sans selection:bg-[#9100BD]/20">
             {/* Global Header */}
-            <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6 shrink-0 z-50 shadow-sm relative">
-                <div className="flex items-center gap-4">
+            <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-3 md:px-6 shrink-0 z-50 shadow-sm relative">
+                <div className="flex items-center gap-2 md:gap-4">
                     <div className="flex items-center gap-2">
                         <img src="/icon.png" alt="PinPoint" className="w-8 h-8 rounded-lg shadow-md shadow-[#9100BD]/20" />
                         <span className="font-bold text-xl tracking-tight text-[#9100BD]">PinPoint</span>
@@ -299,7 +299,7 @@ function App() {
                     {activeVideo.status !== 'approved' && (
                         <button
                             onClick={() => handleUpdateStatus('approved')}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-green-50 text-green-600 text-xs font-semibold rounded-full transition-colors border border-green-200 shadow-sm"
+                            className="flex items-center gap-1.5 px-2 md:px-3 py-1.5 bg-white hover:bg-green-50 text-green-600 text-xs font-semibold rounded-full transition-colors border border-green-200 shadow-sm"
                         >
                             <span className="text-sm">✅</span> <span className="hidden md:inline">Approve</span>
                         </button>
@@ -307,7 +307,7 @@ function App() {
                     {activeVideo.status !== 'rejected' && (
                         <button
                             onClick={() => handleUpdateStatus('rejected')}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-red-50 text-red-600 text-xs font-semibold rounded-full transition-colors border border-red-200 shadow-sm"
+                            className="flex items-center gap-1.5 px-2 md:px-3 py-1.5 bg-white hover:bg-red-50 text-red-600 text-xs font-semibold rounded-full transition-colors border border-red-200 shadow-sm"
                         >
                             <span className="text-sm">❌</span> <span className="hidden md:inline">Request Changes</span>
                         </button>
@@ -322,10 +322,11 @@ function App() {
                             const token = params.get('token') || '';
                             window.location.href = `/api/video/${videoId}/export/premiere?token=${encodeURIComponent(token)}`;
                         }}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-slate-600 text-xs font-medium rounded-full transition-colors border border-gray-200/50"
+                        className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-slate-600 text-xs font-medium rounded-full transition-colors border border-gray-200/50"
+                        title="Export to Premiere"
                     >
                         <Share className="w-3.5 h-3.5" />
-                        Export to Premiere
+                        <span className="hidden md:inline">Export</span>
                     </button>
 
                     <div className="flex items-center gap-3 pl-2 border-l border-gray-100">
@@ -345,7 +346,7 @@ function App() {
             <main className="flex-1 overflow-hidden relative">
                 <div className="flex h-full flex-col md:flex-row">
                     {/* Player Area */}
-                    <div className="flex-1 bg-black flex items-center justify-center relative overflow-hidden">
+                    <div className="w-full h-[35vh] shrink-0 md:h-full md:flex-1 bg-black flex items-center justify-center relative overflow-hidden">
                         <VideoPlayer
                             url={videoId ? getStreamUrl(videoId) : ''}
                             onTimeUpdate={handleTimeUpdate}
@@ -358,7 +359,7 @@ function App() {
                     </div>
 
                     {/* Sidebar Area */}
-                    <div className="h-1/3 md:h-full md:w-96 shrink-0 z-20">
+                    <div className="flex-1 overflow-hidden md:h-full md:w-96 shrink-0 z-20">
                         <CommentSidebar
                             comments={comments}
                             currentTime={currentTime}

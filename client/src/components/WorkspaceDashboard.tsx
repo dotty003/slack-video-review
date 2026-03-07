@@ -45,16 +45,16 @@ const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({
         <div className="absolute inset-0 z-50 bg-[#0A0A0A] flex flex-col font-sans overflow-hidden">
             {/* Header */}
             <header className="h-16 flex-shrink-0 flex items-center justify-between px-6 bg-[#0A0A0A] border-b border-white/5">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 sm:gap-4">
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/5 transition-colors"
+                        className="p-1.5 sm:p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/5 transition-colors"
                         title="Back to Player"
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </button>
-                    <div className="flex items-center gap-3 border-l border-white/10 pl-4">
-                        <div className="w-8 h-8 bg-gradient-to-br from-[#9100BD] to-[#60007A] rounded-lg flex items-center justify-center text-white font-bold shadow-[0_0_15px_rgba(145,0,189,0.3)]">
+                    <div className="flex items-center gap-2 sm:gap-3 border-l border-white/10 pl-2 sm:pl-4">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-[#9100BD] to-[#60007A] rounded-lg flex items-center justify-center text-white font-bold shadow-[0_0_15px_rgba(145,0,189,0.3)] text-sm sm:text-base">
                             {actualTeamName.charAt(0).toUpperCase()}
                         </div>
                         <div>
@@ -105,14 +105,14 @@ const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({
                                 <div
                                     key={video.id}
                                     onClick={() => onSelectVideo(video.id, video.token)}
-                                    className={`group flex items-center justify-between p-5 rounded-2xl border transition-all duration-300 cursor-pointer ${video.id === videoId
+                                    className={`group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 rounded-2xl border transition-all duration-300 cursor-pointer ${video.id === videoId
                                         ? 'bg-white/10 border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.2)]'
                                         : 'bg-white/5 border-white/5 hover:bg-white/[0.07] hover:border-white/10'
                                         }`}
                                 >
-                                    <div className="flex items-center gap-5">
+                                    <div className="flex items-center gap-4 sm:gap-5">
                                         <div className="relative flex-shrink-0">
-                                            <div className="w-16 h-16 bg-black/40 rounded-xl flex items-center justify-center border border-white/10 group-hover:border-[#9100BD]/50 transition-colors overflow-hidden">
+                                            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-black/40 rounded-xl flex items-center justify-center border border-white/10 group-hover:border-[#9100BD]/50 transition-colors overflow-hidden">
                                                 <Play className={`w-6 h-6 ${video.id === videoId ? 'text-[#9100BD]' : 'text-white/30 group-hover:text-white/70'} transition-colors ml-1`} />
                                             </div>
                                             {video.id === videoId && (
@@ -134,7 +134,7 @@ const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({
                                                 </span>
                                             </div>
 
-                                            <div className="flex items-center gap-4 text-xs text-white/40">
+                                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-white/40">
                                                 <span className="flex items-center gap-1.5">
                                                     <Clock className="w-3.5 h-3.5" />
                                                     {formatRelativeTime(video.created_at)}
@@ -146,7 +146,7 @@ const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-6">
+                                    <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-0 border-white/10">
                                         <div className="flex items-center gap-4">
                                             <div className="flex flex-col items-end">
                                                 <span className="text-white/70 text-sm font-medium flex items-center gap-1.5">
