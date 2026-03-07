@@ -104,6 +104,14 @@ async function initPostgres() {
             END $$;
         `);
 
+        // Add status column
+        await client.query(`
+            DO $$ BEGIN
+                ALTER TABLE videos ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
+            EXCEPTION WHEN duplicate_column THEN NULL;
+            END $$;
+        `);
+
         // Create indexes
         await client.query(`
             CREATE INDEX IF NOT EXISTS idx_comments_video_id ON comments(video_id)
@@ -216,6 +224,11 @@ async function initSqlite() {
         if (!videoColumnNames.includes('video_name')) {
             db.run("ALTER TABLE videos ADD COLUMN video_name TEXT");
             console.log('📦 Added video_name column to videos table');
+        }
+
+        if (!videoColumnNames.includes('status')) {
+            db.run("ALTER TABLE videos ADD COLUMN status TEXT DEFAULT 'pending'");
+            console.log('📦 Added status column to videos table');
         }
     } catch (err) {
         console.warn('Migration warning:', err.message);

@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS videos (
     video_name TEXT,
     video_type TEXT,
     team_id TEXT,
+    status TEXT DEFAULT 'pending',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(channel_id, message_ts)
 );

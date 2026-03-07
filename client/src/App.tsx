@@ -132,6 +132,18 @@ const App: React.FC = () => {
         }
     };
 
+    const handleUpdateStatus = async (newStatus: 'approved' | 'rejected' | 'pending') => {
+        if (!activeVideo || !currentUser || !videoId) return;
+        try {
+            const res = await api.updateVideoStatus(videoId, currentUser.name, newStatus);
+            if (res.success) {
+                setActiveVideo({ ...activeVideo, status: newStatus });
+            }
+        } catch (err) {
+            console.error('Failed to update status:', err);
+        }
+    };
+
     // If no valid token, show auth error
     if (!hasValidToken()) {
         return (
@@ -204,9 +216,35 @@ const App: React.FC = () => {
                     </div>
                     <div className="h-6 w-px bg-gray-200 mx-2 hidden md:block"></div>
                     <h1 className="font-medium text-slate-700 text-sm truncate max-w-md hidden md:block">{videoTitle}</h1>
+                    {activeVideo.status === 'approved' && (
+                        <span className="ml-3 px-2 py-0.5 bg-green-100 text-green-700 text-[10px] uppercase font-bold tracking-wider rounded border border-green-200 hidden md:inline-block">Approved</span>
+                    )}
+                    {activeVideo.status === 'rejected' && (
+                        <span className="ml-3 px-2 py-0.5 bg-red-100 text-red-700 text-[10px] uppercase font-bold tracking-wider rounded border border-red-200 hidden md:inline-block">Changes Requested</span>
+                    )}
                 </div>
 
-                <div className="flex items-center gap-5">
+                <div className="flex items-center gap-2 md:gap-4">
+                    {/* Approve/Reject Buttons */}
+                    {activeVideo.status !== 'approved' && (
+                        <button
+                            onClick={() => handleUpdateStatus('approved')}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-green-50 text-green-600 text-xs font-semibold rounded-full transition-colors border border-green-200 shadow-sm"
+                        >
+                            <span className="text-sm">✅</span> <span className="hidden md:inline">Approve</span>
+                        </button>
+                    )}
+                    {activeVideo.status !== 'rejected' && (
+                        <button
+                            onClick={() => handleUpdateStatus('rejected')}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-red-50 text-red-600 text-xs font-semibold rounded-full transition-colors border border-red-200 shadow-sm"
+                        >
+                            <span className="text-sm">❌</span> <span className="hidden md:inline">Request Changes</span>
+                        </button>
+                    )}
+
+                    <div className="h-4 w-px bg-gray-200 mx-1 hidden md:block"></div>
+
                     <button
                         onClick={() => {
                             if (!videoId) return;

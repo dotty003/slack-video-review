@@ -27,6 +27,7 @@ export interface Video {
     video_url: string;
     video_name?: string;
     video_type?: string;
+    status?: 'pending' | 'approved' | 'rejected';
     created_at: string;
 }
 

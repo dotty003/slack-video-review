@@ -4,7 +4,7 @@ const http = require('http');
 const { URL } = require('url');
 const { WebClient } = require('@slack/web-api');
 const commentsService = require('../services/comments');
-const { getVideoById } = require('../services/videos');
+const { getVideoById, updateVideoStatus } = require('../services/videos');
 const config = require('../config');
 const { requireReviewAuth, requireCommentAuth } = require('../middleware/auth');
 const { getBotTokenForTeam } = require('../database/installationStore');
@@ -431,6 +431,52 @@ function createApiRouter(slackApp) {
             res.json({ success: true, comment });
         } catch (err) {
             console.error('API error:', err);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    });
+
+    // Update video status (Approve / Reject)
+    router.post('/video/:id/status', requireReviewAuth, async (req, res) => {
+        try {
+            const videoId = parseInt(req.params.id, 10);
+            const { status, userName } = req.body;
+
+            if (!['approved', 'rejected', 'pending'].includes(status)) {
+                return res.status(400).json({ error: 'Invalid status' });
+            }
+
+            const video = await getVideoById(videoId);
+            if (!video) {
+                return res.status(404).json({ error: 'Video not found' });
+            }
+
+            const updatedVideo = await updateVideoStatus(videoId, status);
+
+            // Post to Slack thread
+            if (video.channel_id && video.message_ts) {
+                try {
+                    const slackClient = await getSlackClientForVideo(videoId);
+                    if (slackClient) {
+                        const statusEmoji = status === 'approved' ? '✅' : (status === 'rejected' ? '❌' : '🔄');
+                        const statusAction = status === 'approved' ? 'Approved' : (status === 'rejected' ? 'Requested Changes for' : 'Reset status for');
+                        const messageText = `${statusEmoji} *${userName || 'A reviewer'}* has *${statusAction}* this video.`;
+
+                        const messagePayload = {
+                            channel: video.channel_id,
+                            thread_ts: video.message_ts,
+                            text: messageText,
+                        };
+
+                        await slackClient.chat.postMessage(messagePayload);
+                    }
+                } catch (slackErr) {
+                    console.error('Failed to post status update to Slack:', slackErr.message);
+                }
+            }
+
+            res.json({ success: true, video: updatedVideo });
+        } catch (err) {
+            console.error('API error updating status:', err);
             res.status(500).json({ error: 'Internal server error' });
         }
     });

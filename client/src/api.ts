@@ -1,4 +1,4 @@
-import { VideoResponse, Comment } from './types';
+import { VideoResponse, Comment, Video } from './types';
 
 // Extract token from URL query params (set once on page load)
 const urlParams = new URLSearchParams(window.location.search);
@@ -105,6 +105,25 @@ export async function unresolveComment(commentId: number): Promise<{ success: bo
     });
     if (!response.ok) {
         throw new Error('Failed to unresolve comment');
+    }
+    return response.json();
+}
+
+/**
+ * Update the status of a video
+ */
+export async function updateVideoStatus(
+    videoId: number,
+    userName: string,
+    status: 'pending' | 'approved' | 'rejected'
+): Promise<{ success: boolean; video: Video }> {
+    const response = await fetch(`${API_BASE}/video/${videoId}/status?token=${encodeURIComponent(REVIEW_TOKEN)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userName, status }),
+    });
+    if (!response.ok) {
+        throw new Error('Failed to update status');
     }
     return response.json();
 }

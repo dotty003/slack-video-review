@@ -140,6 +140,18 @@ async function getVideoById(videoId) {
     return await stmt.get(videoId);
 }
 
+/**
+ * Update video status
+ * @param {number} videoId - Video ID
+ * @param {string} status - New status ('pending', 'approved', 'rejected')
+ * @returns {object|null} - Updated video record
+ */
+async function updateVideoStatus(videoId, status) {
+    const stmt = prepare('UPDATE videos SET status = ? WHERE id = ?');
+    await stmt.run(status, videoId);
+    return await getVideoById(videoId);
+}
+
 module.exports = {
     isVideoFile,
     detectVideoUrl,
@@ -147,5 +159,6 @@ module.exports = {
     getVideoByMessage,
     getVideoByThread,
     getVideoById,
+    updateVideoStatus,
     VIDEO_EXTENSIONS,
 };
