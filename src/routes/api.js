@@ -366,6 +366,47 @@ function createApiRouter(slackApp) {
         }
     });
 
+    // Fetch workspace users for @mentions
+    router.get('/workspaces/:teamId/users', requireReviewAuth, async (req, res) => {
+        try {
+            const teamId = req.params.teamId;
+            let botToken = config.slack.botToken;
+
+            if (teamId) {
+                try {
+                    const token = await getBotTokenForTeam(teamId);
+                    if (token) botToken = token;
+                } catch (e) {
+                    console.error('Error getting team token for users list:', e.message);
+                }
+            }
+
+            if (!botToken) {
+                return res.status(500).json({ error: 'No bot token available' });
+            }
+
+            const slackClient = new WebClient(botToken);
+            const result = await slackClient.users.list();
+
+            if (!result.ok) {
+                return res.status(500).json({ error: 'Slack API error' });
+            }
+
+            const users = result.members
+                .filter(u => !u.is_bot && !u.deleted)
+                .map(u => ({
+                    id: u.id,
+                    name: u.profile?.display_name || u.profile?.real_name || u.name,
+                    avatarUrl: u.profile?.image_48 || '',
+                }));
+
+            res.json({ users });
+        } catch (err) {
+            console.error('API error fetching users:', err.message);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    });
+
     // Add comment from web UI
     router.post('/video/:id/comments', requireReviewAuth, async (req, res) => {
         try {
@@ -410,6 +451,37 @@ function createApiRouter(slackApp) {
                         // If there's an attachment (annotation screenshot), note it
                         if (attachmentUrl && attachmentUrl.startsWith('data:image')) {
                             messagePayload.text += '\n📎 _[Annotation attached - view in web player]_';
+                        }
+
+                        // Parse @mentions in commentText and replace @User Name with Slack <@U12345> format
+                        // This relies on the UI sending the raw commentText exactly as typed or specifically formatted.
+                        // We do a best-effort find-and-replace using the workspace users if available.
+                        try {
+                            const result = await slackClient.users.list();
+                            if (result.ok) {
+                                let formattedText = commentText;
+                                // Simple regex to find @word patterns (can be improved based on UI implementation)
+                                const users = result.members || [];
+
+                                // Since UI might just send "@John Doe", we do a naive replace based on display names
+                                users.forEach(u => {
+                                    const displayName = u.profile?.display_name || u.profile?.real_name || u.name;
+                                    if (displayName) {
+                                        const regex = new RegExp(`@${displayName}\\b`, 'gi');
+                                        if (regex.test(formattedText)) {
+                                            formattedText = formattedText.replace(regex, `<@${u.id}>`);
+                                        }
+                                    }
+                                });
+                                // Rebuild payload text with potentially formatted mentions
+                                messagePayload.text = `📝 *[${timeStr}]* ${userName || 'Reviewer'}: "${formattedText}"`;
+
+                                if (attachmentUrl && attachmentUrl.startsWith('data:image')) {
+                                    messagePayload.text += '\n📎 _[Annotation attached - view in web player]_';
+                                }
+                            }
+                        } catch (e) {
+                            console.error('Failed to parse mentions:', e.message);
                         }
 
                         const slackResult = await slackClient.chat.postMessage(messagePayload);

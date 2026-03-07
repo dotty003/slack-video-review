@@ -43,6 +43,7 @@ const App: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeAnnotation, setActiveAnnotation] = useState<string | null>(null);
+    const [workspaceUsers, setWorkspaceUsers] = useState<User[]>([]);
 
     // Refs
     const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -71,6 +72,23 @@ const App: React.FC = () => {
     useEffect(() => {
         loadVideoData();
     }, [loadVideoData]);
+
+    // Fetch workspace users once video data is loaded
+    useEffect(() => {
+        const fetchUsers = async () => {
+            if (activeVideo?.channel_id) {
+                try {
+                    // Using a dummy teamId since we aren't exposing it on the Video model yet
+                    // In a real app we'd pass the team_id. For now we use "default" to rely on bot token
+                    const { users } = await api.fetchWorkspaceUsers('default');
+                    setWorkspaceUsers(users);
+                } catch (err) {
+                    console.error('Failed to fetch workspace users:', err);
+                }
+            }
+        };
+        fetchUsers();
+    }, [activeVideo?.channel_id]);
 
     // Video & Comment Interaction Handlers
     const handleTimeUpdate = (time: number) => {
@@ -298,6 +316,7 @@ const App: React.FC = () => {
                             onDeleteComment={handleDeleteComment}
                             currentUser={currentUser}
                             status={status}
+                            workspaceUsers={workspaceUsers}
                         />
                     </div>
                 </div>

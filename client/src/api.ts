@@ -1,4 +1,4 @@
-import { VideoResponse, Comment, Video } from './types';
+import { VideoResponse, Comment, Video, User } from './types';
 
 // Extract token from URL query params (set once on page load)
 const urlParams = new URLSearchParams(window.location.search);
@@ -105,6 +105,17 @@ export async function unresolveComment(commentId: number): Promise<{ success: bo
     });
     if (!response.ok) {
         throw new Error('Failed to unresolve comment');
+    }
+    return response.json();
+}
+
+/**
+ * Fetch workspace users for @mentions
+ */
+export async function fetchWorkspaceUsers(teamId: string): Promise<{ users: User[] }> {
+    const response = await fetch(`${API_BASE}/workspaces/${teamId}/users?token=${encodeURIComponent(REVIEW_TOKEN)}`);
+    if (!response.ok) {
+        throw new Error('Failed to fetch workspace users');
     }
     return response.json();
 }

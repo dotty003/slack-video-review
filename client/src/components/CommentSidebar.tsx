@@ -12,6 +12,7 @@ interface CommentSidebarProps {
     onDeleteComment: (id: number) => void;
     currentUser: User;
     status: { open: number; resolved: number; total: number };
+    workspaceUsers?: User[];
 }
 
 const CommentSidebar: React.FC<CommentSidebarProps> = ({
@@ -23,11 +24,17 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
     onDeleteComment,
     currentUser,
     status,
+    workspaceUsers = [],
 }) => {
     const [newCommentText, setNewCommentText] = useState('');
     const [attachment, setAttachment] = useState<string | null>(null);
     const [attachmentFilename, setAttachmentFilename] = useState<string | null>(null);
     const [filter, setFilter] = useState<'all' | 'open' | 'resolved'>('all');
+
+    // Mention state
+    const [showMentions, setShowMentions] = useState(false);
+    const [mentionFilter, setMentionFilter] = useState('');
+    const [mentionIndex, setMentionIndex] = useState(0);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -47,7 +54,63 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
             setNewCommentText('');
             setAttachment(null);
             setAttachmentFilename(null);
+            setShowMentions(false);
             setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+        }
+    };
+
+    // Mentions logic
+    const filteredUsers = workspaceUsers.filter(u =>
+        u.name.toLowerCase().includes(mentionFilter.toLowerCase())
+    ).slice(0, 5); // Show max 5 suggestions
+
+    const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const text = e.target.value;
+        setNewCommentText(text);
+
+        // Check if we should show mentions dropdown
+        const cursorPosition = e.target.selectionStart || 0;
+        const textBeforeCursor = text.slice(0, cursorPosition);
+        const match = textBeforeCursor.match(/@(\w*)$/);
+
+        if (match) {
+            setShowMentions(true);
+            setMentionFilter(match[1]);
+            setMentionIndex(0);
+        } else {
+            setShowMentions(false);
+        }
+    };
+
+    const insertMention = (userName: string) => {
+        const cursorPosition = (document.activeElement as HTMLInputElement)?.selectionStart || newCommentText.length;
+        const textBeforeCursor = newCommentText.slice(0, cursorPosition);
+        const textAfterCursor = newCommentText.slice(cursorPosition);
+
+        // Find where the @ symbol started
+        const match = textBeforeCursor.match(/@(\w*)$/);
+        if (match) {
+            const index = match.index || 0;
+            const newText = textBeforeCursor.slice(0, index) + `@${userName} ` + textAfterCursor;
+            setNewCommentText(newText);
+            setShowMentions(false);
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (showMentions && filteredUsers.length > 0) {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setMentionIndex(prev => (prev + 1) % filteredUsers.length);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setMentionIndex(prev => (prev - 1 + filteredUsers.length) % filteredUsers.length);
+            } else if (e.key === 'Enter' || e.key === 'Tab') {
+                e.preventDefault();
+                insertMention(filteredUsers[mentionIndex].name);
+            } else if (e.key === 'Escape') {
+                setShowMentions(false);
+            }
         }
     };
 
@@ -102,8 +165,8 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
                             key={f}
                             onClick={() => setFilter(f)}
                             className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all capitalize ${filter === f
-                                    ? 'bg-white text-slate-900 shadow-sm'
-                                    : 'text-slate-500 hover:text-slate-700'
+                                ? 'bg-white text-slate-900 shadow-sm'
+                                : 'text-slate-500 hover:text-slate-700'
                                 }`}
                         >
                             {f}
@@ -129,8 +192,8 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
                             <div
                                 key={comment.id}
                                 className={`group relative bg-white rounded-xl p-4 border transition-all duration-200 hover:shadow-md ${isActive
-                                        ? 'border-[#9100BD]/30 shadow-md ring-1 ring-[#9100BD]/10'
-                                        : 'border-gray-100 shadow-sm hover:border-gray-200'
+                                    ? 'border-[#9100BD]/30 shadow-md ring-1 ring-[#9100BD]/10'
+                                    : 'border-gray-100 shadow-sm hover:border-gray-200'
                                     } ${comment.resolved ? 'opacity-75 bg-gray-50' : ''}`}
                             >
                                 {/* Active Indicator Bar */}
@@ -262,10 +325,35 @@ const CommentSidebar: React.FC<CommentSidebarProps> = ({
                         <input
                             type="text"
                             value={newCommentText}
-                            onChange={(e) => setNewCommentText(e.target.value)}
-                            placeholder="Leave a comment..."
+                            onChange={handleTextChange}
+                            onKeyDown={handleKeyDown}
+                            placeholder="Leave a comment... (Type @ to tag)"
                             className="w-full bg-transparent border-none focus:outline-none focus:ring-0 text-sm text-slate-800 placeholder:text-slate-400 p-1"
                         />
+
+                        {/* Mentions Dropdown */}
+                        {showMentions && filteredUsers.length > 0 && (
+                            <div className="absolute bottom-full mb-2 left-4 right-4 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden z-50">
+                                {filteredUsers.map((user, idx) => (
+                                    <button
+                                        key={user.id}
+                                        type="button"
+                                        className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-gray-50 transition-colors ${idx === mentionIndex ? 'bg-[#9100BD]/10 text-[#9100BD]' : 'text-slate-700'
+                                            }`}
+                                        onClick={() => insertMention(user.name)}
+                                    >
+                                        {user.avatarUrl ? (
+                                            <img src={user.avatarUrl} alt="" className="w-5 h-5 rounded-full" />
+                                        ) : (
+                                            <div className="w-5 h-5 rounded-full bg-[#9100BD] text-white flex items-center justify-center text-[10px] font-bold">
+                                                {user.name.charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
+                                        <span className="truncate">{user.name}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                         <div className="flex items-center justify-between mt-1 px-1">
                             <div className="flex items-center gap-2">
                                 <input
