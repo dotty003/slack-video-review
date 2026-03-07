@@ -123,7 +123,7 @@ export async function fetchWorkspaceUsers(videoId: number): Promise<{ users: Use
 /**
  * Fetch all videos for the current workspace
  */
-export async function fetchWorkspaceVideos(videoId: number): Promise<{ videos: AdminVideo[] }> {
+export async function fetchWorkspaceVideos(videoId: number): Promise<{ videos: AdminVideo[], teamName?: string }> {
     const response = await fetch(`${API_BASE}/video/${videoId}/workspace-videos?token=${encodeURIComponent(REVIEW_TOKEN)}`);
     if (!response.ok) {
         throw new Error('Failed to fetch workspace videos');

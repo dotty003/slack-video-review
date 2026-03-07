@@ -822,7 +822,12 @@ function createApiRouter(slackApp) {
 
             // Fetch all videos for this workspace with their stats
             const videos = await getVideosByTeamWithStats(targetVideo.team_id);
-            res.json({ videos });
+
+            // Fetch the exact team name from the installations database
+            const installations = require('../database/installationStore');
+            const teamName = await installations.getTeamName(targetVideo.team_id) || targetVideo.team_id;
+
+            res.json({ videos, teamName });
         } catch (err) {
             console.error('Workspace list videos error:', err);
             res.status(500).json({ error: 'Failed to list workspace videos' });

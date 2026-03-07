@@ -166,6 +166,17 @@ async function setWorkspaceActive(teamId, active) {
     console.log(`📦 Workspace ${teamId} set to ${active ? 'ACTIVE' : 'INACTIVE'}`);
 }
 
+/**
+ * Get the exact team name for a given team ID.
+ * @param {string} teamId - Slack team/workspace ID
+ * @returns {string|null} Team name or null
+ */
+async function getTeamName(teamId) {
+    if (!teamId) return null;
+    const row = await prepare('SELECT team_name FROM installations WHERE team_id = ?').get(teamId);
+    return row ? row.team_name : null;
+}
+
 module.exports = {
     storeInstallation,
     fetchInstallation,
@@ -173,4 +184,5 @@ module.exports = {
     getBotTokenForTeam,
     getAllInstallations,
     setWorkspaceActive,
+    getTeamName,
 };

@@ -18,6 +18,7 @@ const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({
     onSelectVideo
 }) => {
     const [videos, setVideos] = useState<AdminVideo[]>([]);
+    const [actualTeamName, setActualTeamName] = useState(teamName);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -26,6 +27,9 @@ const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({
             try {
                 const data = await api.fetchWorkspaceVideos(videoId);
                 setVideos(data.videos);
+                if (data.teamName) {
+                    setActualTeamName(data.teamName);
+                }
             } catch (err) {
                 console.error('Failed to load workspace videos:', err);
                 setError('Failed to load workspace videos. Please try again.');
@@ -51,10 +55,10 @@ const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({
                     </button>
                     <div className="flex items-center gap-3 border-l border-white/10 pl-4">
                         <div className="w-8 h-8 bg-gradient-to-br from-[#9100BD] to-[#60007A] rounded-lg flex items-center justify-center text-white font-bold shadow-[0_0_15px_rgba(145,0,189,0.3)]">
-                            {teamName.charAt(0).toUpperCase()}
+                            {actualTeamName.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                            <h1 className="text-white font-medium tracking-wide text-sm">{teamName}</h1>
+                            <h1 className="text-white font-medium tracking-wide text-sm">{actualTeamName}</h1>
                             <p className="text-white/40 text-xs">Video Workspace</p>
                         </div>
                     </div>
@@ -67,7 +71,7 @@ const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({
                     <div className="flex items-center justify-between mb-8">
                         <div>
                             <h2 className="text-2xl font-semibold text-white tracking-tight">All Reviews</h2>
-                            <p className="text-white/50 text-sm mt-1">Manage and track video approvals for {teamName}.</p>
+                            <p className="text-white/50 text-sm mt-1">Manage and track video approvals for {actualTeamName}.</p>
                         </div>
                     </div>
 
@@ -102,8 +106,8 @@ const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({
                                     key={video.id}
                                     onClick={() => onSelectVideo(video.id)}
                                     className={`group flex items-center justify-between p-5 rounded-2xl border transition-all duration-300 cursor-pointer ${video.id === videoId
-                                            ? 'bg-white/10 border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.2)]'
-                                            : 'bg-white/5 border-white/5 hover:bg-white/[0.07] hover:border-white/10'
+                                        ? 'bg-white/10 border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.2)]'
+                                        : 'bg-white/5 border-white/5 hover:bg-white/[0.07] hover:border-white/10'
                                         }`}
                                 >
                                     <div className="flex items-center gap-5">
@@ -122,8 +126,8 @@ const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({
                                                     {video.video_name || `Video #${video.id}`}
                                                 </h3>
                                                 <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider ${video.status === 'approved' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
-                                                        video.status === 'rejected' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
-                                                            'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                                    video.status === 'rejected' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                                        'bg-amber-500/10 text-amber-400 border border-amber-500/20'
                                                     }`}>
                                                     {video.status === 'approved' ? 'Approved' :
                                                         video.status === 'rejected' ? 'Changes Req' : 'Reviewing'}
@@ -169,8 +173,8 @@ const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({
 
                                         <div className="pl-6 border-l border-white/10 hidden sm:block">
                                             <div className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${video.id === videoId
-                                                    ? 'bg-white/10 text-white cursor-default'
-                                                    : 'bg-[#9100BD] hover:bg-[#7a00a0] text-white'
+                                                ? 'bg-white/10 text-white cursor-default'
+                                                : 'bg-[#9100BD] hover:bg-[#7a00a0] text-white'
                                                 }`}>
                                                 {video.id === videoId ? 'Current' : 'Review'}
                                             </div>
