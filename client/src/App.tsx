@@ -3,11 +3,21 @@ import { User, Video, Comment, VideoResponse } from './types';
 import VideoPlayer from './components/VideoPlayer';
 import CommentSidebar from './components/CommentSidebar';
 import LoginScreen from './components/LoginScreen';
+import AdminLogin from './components/AdminLogin';
+import AdminDashboard from './components/AdminDashboard';
 import * as api from './api';
 import { getStreamUrl, hasValidToken } from './api';
 import { Share } from 'lucide-react';
 
-const App: React.FC = () => {
+const formatTime = (seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')} `;
+    return `${m}:${s.toString().padStart(2, '0')} `;
+};
+
+function App() {
     // State
     const [currentUser, setCurrentUser] = useState<User | null>(() => {
         if (typeof window !== 'undefined') {
@@ -18,7 +28,7 @@ const App: React.FC = () => {
 
             if (slackUserName) {
                 return {
-                    id: slackUserId || `u-${Date.now()}`,
+                    id: slackUserId || `u - ${Date.now()} `,
                     name: slackUserName,
                     avatarUrl: slackAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(slackUserName)}&background=FF5BA3&color=fff&bold=true`
                 };
@@ -44,6 +54,19 @@ const App: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [activeAnnotation, setActiveAnnotation] = useState<string | null>(null);
     const [workspaceUsers, setWorkspaceUsers] = useState<User[]>([]);
+
+    // Admin state
+    const [isAdminRoute, setIsAdminRoute] = useState(window.location.pathname.startsWith('/admin'));
+    const [adminSecret, setAdminSecret] = useState<string | null>(localStorage.getItem('admin_secret'));
+
+    // Listen for history changes if needed, but for simple app just checking on mount is usually okay
+    useEffect(() => {
+        const handleLocationChange = () => {
+            setIsAdminRoute(window.location.pathname.startsWith('/admin'));
+        };
+        window.addEventListener('popstate', handleLocationChange);
+        return () => window.removeEventListener('popstate', handleLocationChange);
+    }, []);
 
     // Refs
     const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -160,6 +183,21 @@ const App: React.FC = () => {
         }
     };
 
+    // --- Admin Routing ---
+    if (isAdminRoute) {
+        if (!adminSecret) {
+            return <AdminLogin onLogin={(secret) => {
+                setAdminSecret(secret);
+                localStorage.setItem('admin_secret', secret);
+            }} />;
+        }
+        return <AdminDashboard secret={adminSecret} onLogout={() => {
+            setAdminSecret(null);
+            localStorage.removeItem('admin_secret');
+        }} />;
+    }
+
+    // --- Review Routing ---
     // If no valid token, show auth error
     if (!hasValidToken()) {
         return (

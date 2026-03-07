@@ -152,6 +152,25 @@ async function updateVideoStatus(videoId, status) {
     return await getVideoById(videoId);
 }
 
+/**
+ * Get all videos with comment statistics for the admin dashboard.
+ */
+async function getAllVideosWithStats() {
+    const query = `
+        SELECT 
+            v.*,
+            COUNT(c.id) as total_comments,
+            SUM(CASE WHEN c.resolved = 0 THEN 1 ELSE 0 END) as open_comments,
+            SUM(CASE WHEN c.resolved = 1 THEN 1 ELSE 0 END) as resolved_comments
+        FROM videos v
+        LEFT JOIN comments c ON v.id = c.video_id
+        GROUP BY v.id
+        ORDER BY v.created_at DESC
+    `;
+    const stmt = prepare(query);
+    return await stmt.all();
+}
+
 module.exports = {
     isVideoFile,
     detectVideoUrl,
@@ -160,5 +179,6 @@ module.exports = {
     getVideoByThread,
     getVideoById,
     updateVideoStatus,
+    getAllVideosWithStats,
     VIDEO_EXTENSIONS,
 };

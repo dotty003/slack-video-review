@@ -31,6 +31,12 @@ export interface Video {
     created_at: string;
 }
 
+export interface AdminVideo extends Video {
+    total_comments: number;
+    open_comments: number;
+    resolved_comments: number;
+}
+
 export interface VideoResponse {
     video: Video;
     comments: Comment[];

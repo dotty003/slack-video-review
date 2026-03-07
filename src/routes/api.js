@@ -4,7 +4,7 @@ const http = require('http');
 const { URL } = require('url');
 const { WebClient } = require('@slack/web-api');
 const commentsService = require('../services/comments');
-const { getVideoById, updateVideoStatus } = require('../services/videos');
+const { getVideoById, updateVideoStatus, getAllVideosWithStats } = require('../services/videos');
 const config = require('../config');
 const { requireReviewAuth, requireCommentAuth } = require('../middleware/auth');
 const { getBotTokenForTeam } = require('../database/installationStore');
@@ -787,6 +787,20 @@ function createApiRouter(slackApp) {
         }
         next();
     }
+
+    /**
+     * GET /api/admin/videos
+     * List all videos with their status and comment counts.
+     */
+    router.get('/admin/videos', requireAdmin, async (req, res) => {
+        try {
+            const videos = await getAllVideosWithStats();
+            res.json({ videos });
+        } catch (err) {
+            console.error('Admin list videos error:', err);
+            res.status(500).json({ error: 'Failed to list videos' });
+        }
+    });
 
     /**
      * GET /api/admin/workspaces

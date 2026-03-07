@@ -1,4 +1,4 @@
-import { VideoResponse, Comment, Video, User } from './types';
+import { VideoResponse, Comment, Video, User, AdminVideo } from './types';
 
 // Extract token from URL query params (set once on page load)
 const urlParams = new URLSearchParams(window.location.search);
@@ -117,6 +117,23 @@ export async function fetchWorkspaceUsers(videoId: number): Promise<{ users: Use
     if (!response.ok) {
         throw new Error('Failed to fetch workspace users');
     }
+    return response.json();
+}
+
+/**
+ * Validates admin secret and fetches admin dashboard data
+ */
+export async function fetchAdminVideos(secret: string): Promise<{ videos: AdminVideo[] }> {
+    const response = await fetch(`${API_BASE}/admin/videos`, {
+        headers: {
+            'x-admin-secret': secret
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch admin videos');
+    }
+
     return response.json();
 }
 
