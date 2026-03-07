@@ -380,8 +380,8 @@ function App() {
                     videoId={activeVideo.id}
                     teamName={activeVideo.team_id || 'Workspace'}
                     onClose={() => setShowWorkspaceDashboard(false)}
-                    onSelectVideo={(id) => {
-                        window.location.href = `/review?video=${id}&token=${new URLSearchParams(window.location.search).get('token')}`;
+                    onSelectVideo={(id, token) => {
+                        window.location.href = `/review?video=${id}&token=${token || new URLSearchParams(window.location.search).get('token')}`;
                     }}
                 />
             )}

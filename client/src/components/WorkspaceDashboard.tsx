@@ -8,7 +8,7 @@ interface WorkspaceDashboardProps {
     videoId: number;
     teamName: string;
     onClose: () => void;
-    onSelectVideo: (videoId: number) => void;
+    onSelectVideo: (videoId: number, token?: string) => void;
 }
 
 const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({
@@ -104,7 +104,7 @@ const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({
                             {videos.map((video) => (
                                 <div
                                     key={video.id}
-                                    onClick={() => onSelectVideo(video.id)}
+                                    onClick={() => onSelectVideo(video.id, video.token)}
                                     className={`group flex items-center justify-between p-5 rounded-2xl border transition-all duration-300 cursor-pointer ${video.id === videoId
                                         ? 'bg-white/10 border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.2)]'
                                         : 'bg-white/5 border-white/5 hover:bg-white/[0.07] hover:border-white/10'

@@ -36,6 +36,7 @@ export interface AdminVideo extends Video {
     total_comments: number;
     open_comments: number;
     resolved_comments: number;
+    token?: string;
 }
 
 export interface VideoResponse {
