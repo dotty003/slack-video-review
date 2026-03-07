@@ -806,34 +806,7 @@ function createApiRouter(slackApp) {
      * GET /api/video/:id/workspace-videos
      * Get all videos for the workspace associated with the given video ID.
      */
-    router.get('/video/:id/workspace-videos', async (req, res) => {
-        try {
-            const videoId = req.params.id;
-
-            // First get the target video to find its team_id
-            const targetVideo = await getVideoById(videoId);
-            if (!targetVideo) {
-                return res.status(404).json({ error: 'Source video not found' });
-            }
-
-            if (!targetVideo.team_id) {
-                return res.status(400).json({ error: 'Source video has no associated workspace' });
-            }
-
-            // Fetch all videos for this workspace with their stats
-            const videos = await getVideosByTeamWithStats(targetVideo.team_id);
-            res.json({ videos });
-        } catch (err) {
-            console.error('Workspace list videos error:', err);
-            res.status(500).json({ error: 'Failed to list workspace videos' });
-        }
-    });
-
-    /**
-     * GET /api/video/:id/workspace-videos
-     * Get all videos for the workspace associated with the given video ID.
-     */
-    router.get('/video/:id/workspace-videos', async (req, res) => {
+    router.get('/video/:id/workspace-videos', requireReviewAuth, async (req, res) => {
         try {
             const videoId = req.params.id;
 
