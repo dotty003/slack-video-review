@@ -128,9 +128,9 @@ expressApp.get('/health', (req, res) => {
     res.json({ status: 'ok', mode: isOAuthMode ? 'oauth' : 'legacy' });
 });
 
-// Admin dashboard
-expressApp.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'pages/admin.html'));
+// Admin dashboard (React SPA)
+expressApp.get('/admin*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 // ================================================
